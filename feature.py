@@ -1,17 +1,27 @@
-import pymongo
-from pymongo import MongoClient
 
-myclient = MongoClient(
-    "mongodb+srv://akhoa1107:anhkhoa123@cluster0.ns8gwdm.mongodb.net/?retryWrites=true&w=majority")
-mydb = myclient["mydatabase"]
-collection = mydb["mydatabase"]
+
 
 post = {
-    "_id": 0,
     "name": "Khoa"
 }
 
-result = collection.find({"name": "Khoa"})
+def start():
+    answer = input('Would you like to connect (yes/no)? ')
+    if answer.lower() != 'yes':
+        return
+    
+    connection = connect()
+    while True:
+        msg = input("Message (q for quit): ")
+        
+        if (msg == 'q'):
+            break
+        
+        send(connection, msg)
+        
+    send(connection, DISCONNECT_MESSAGE)
+    time.sleep(1)
+    print('Disconnect')
+    
+start()
 
-for i in result:
-    print(i)
