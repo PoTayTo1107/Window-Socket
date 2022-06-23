@@ -1,1 +1,0 @@
-conn.send("Invalid answer!".encode(FORMAT))
