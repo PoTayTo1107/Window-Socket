@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import time
+import os
 from concurrent.futures import thread
 from http import client
 from pickle import TRUE
@@ -23,6 +24,10 @@ def send(conn, msg):
 def receive(conn, msg):
     send(conn, msg)
     return conn.recv(2048).decode(FORMAT)
+
+
+def clscr():
+    os.system('cls')
 
 
 def signupChecker(username, password):
@@ -78,7 +83,7 @@ def signUpForm(conn):
 
 
 def loginForm(conn):
-    send(conn, "Login Form")
+    send(conn, "Login Form\n")
     username = receive(conn, "Username: ")
     password = receive(conn, "Password: ")
     data = openFile("users")
@@ -89,7 +94,7 @@ def loginForm(conn):
 
 
 def sendFuncList(conn):
-    send(conn, "Functions list\n1. Add new note\n2. Show all notes\n3. Exit\nEnter number to continue")
+    send(conn, "Functions list\n1. Add new note\n2. Show all notes\nAny other key to exit\n")
 
 
 def writeNote(content, datatype, username):
@@ -123,14 +128,13 @@ def showNote(conn, username):
         if len(data[f'{username}']['notes']) == 0:
             send(conn, "EMPTY")
         else:
+
             for i in data[f'{username}']['notes']:
-                note = note + i + '\n'
-            send(conn, note)
+                #note = note + i + '\n'
+                send(conn, i + '\n')
 
 
 def handle_client(conn, addr):
-    print(f"[NEW CONNECTION] {addr} connected.")
-
     while True:
         send(conn, 'Would you like signup or login (signup/login)?')
         ans = conn.recv(2048).decode(FORMAT)
@@ -140,6 +144,8 @@ def handle_client(conn, addr):
             login, username = loginForm(conn)
             if login == 1:
                 send(conn, 'Login successfully')
+                print(f"[NEW CONNECTION] {username} connected.")
+                print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
                 while True:
                     sendFuncList(conn)
                     func = conn.recv(2048).decode(FORMAT)
@@ -149,22 +155,24 @@ def handle_client(conn, addr):
                     elif func == "2":
                         showNote(conn, username)
                         time.sleep(1)
-                    elif func == "3":
+                    else:
                         conn.close()
+                        print(f"[DISCONNECTION] {username} disconnected.")
+                        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
                         return
             else:
                 send(conn, 'Invalid username or password')
 
 
 def start():
+    clscr()
     server.listen()
+    print("[STARTING] Server is starting...")
     print(f"[LISTENING] Server is listening on {SERVER}")
     while True:
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr))
         thread.start()
-        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
 
 
-print("[STARTING] Server is starting...")
 start()
