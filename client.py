@@ -123,8 +123,8 @@ def recvNote(conn):
 
 
 def start():
-    answer = input('Would you like to connect (yes/no)?\n')
-    if answer.lower() != 'yes':
+    answer = input("Would you like to connect (yes/no)?\n")
+    if answer.lower() != "yes":
         return
     clscr()
     conn = connect()
@@ -135,18 +135,18 @@ def start():
         send(conn, rec)
         clscr()
 
-        if rec.lower() == 'signup':
+        if rec.lower() == "signup":
             form(conn)
             recvPrint(conn)
             clscr()
 
-        if rec.lower() == 'login':
+        if rec.lower() == "login":
             form(conn)
             noti = conn.recv(2048).decode(FORMAT)
             print(noti)
             cont()
             clscr()
-            if noti == 'Login successfully':
+            if noti == "Login successfully":
                 while True:
                     recvPrint(conn)
                     func = input()
@@ -157,7 +157,7 @@ def start():
                     elif func == "2":
                         recvNote(conn)
                     else:
-                        input('DISCONNECTED!')
+                        input("DISCONNECTED!")
                         clscr()
                         exit()
 

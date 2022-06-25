@@ -50,10 +50,10 @@ def writeFile(username, password):
         "username": username,
         "password": password,
     }
-    with open('users.json', 'r') as file:
+    with open("users.json", "r") as file:
         data = json.load(file)
     data.append(user)
-    with open('users.json', 'w') as file:
+    with open("users.json", "w") as file:
         json.dump(data, file, indent=2)
 
 
@@ -65,7 +65,7 @@ def openFile(str):
 
 
 def signUpForm(conn):
-    send(conn, "Sign Up Form")
+    send(conn, "Sign Up Form\n")
     username = receive(conn, "Username: ")
     password = receive(conn, "Password: ")
     out = signupChecker(username, password)
@@ -98,12 +98,12 @@ def sendFuncList(conn):
 
 
 def writeNote(content, datatype, username):
-    with open('data.json', 'r') as file:
+    with open("data.json", "r") as file:
         data = json.load(file)
     for i in data:
         if str(i) == username:
             data[f'{username}'][f'{datatype}'].append(content)
-            with open('data.json', 'w') as file:
+            with open("data.json", "w") as file:
                 json.dump(data, file, indent=2)
             return
     data[f'{username}'] = {}
@@ -111,7 +111,7 @@ def writeNote(content, datatype, username):
     data[f'{username}']['imgs'] = []
     data[f'{username}']['files'] = []
     data[f'{username}'][f'{datatype}'].append(content)
-    with open('data.json', 'w') as file:
+    with open("data.json", "w") as file:
         json.dump(data, file, indent=2)
 
 
@@ -128,22 +128,20 @@ def showNote(conn, username):
         if len(data[f'{username}']['notes']) == 0:
             send(conn, "EMPTY")
         else:
-
             for i in data[f'{username}']['notes']:
-                #note = note + i + '\n'
                 send(conn, i + '\n')
 
 
 def handle_client(conn, addr):
     while True:
-        send(conn, 'Would you like signup or login (signup/login)?')
+        send(conn, "Would you like signup or login (signup/login)?")
         ans = conn.recv(2048).decode(FORMAT)
-        if ans.lower() == 'signup':
+        if ans.lower() == "signup":
             signUpForm(conn)
-        elif ans.lower() == 'login':
+        elif ans.lower() == "login":
             login, username = loginForm(conn)
             if login == 1:
-                send(conn, 'Login successfully')
+                send(conn, "Login successfully")
                 print(f"[NEW CONNECTION] {username} connected.")
                 print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
                 while True:
@@ -158,10 +156,11 @@ def handle_client(conn, addr):
                     else:
                         conn.close()
                         print(f"[DISCONNECTION] {username} disconnected.")
-                        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
+                        print(
+                            f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
                         return
             else:
-                send(conn, 'Invalid username or password')
+                send(conn, "Invalid username or password")
 
 
 def start():
