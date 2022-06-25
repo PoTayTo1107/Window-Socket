@@ -1,12 +1,13 @@
 {
-  "users": [
-    {
-      "username": "Khoaa",
-      "password": "Khoaa"
-    },
-    {
-      "username": "NganLam",
-      "password": "NganLam"
-    }
-  ]
+  "NganLam": {
+    "notes": [],
+    "imgs": [],
+    "files": []
+  },
+  "buiminhsieucapvippro": {
+    "notes": [
+    ],
+    "imgs": [],
+    "files": []
+  }
 }
