@@ -1,6 +1,7 @@
 import socket
 import threading
 import json
+import time
 from concurrent.futures import thread
 from http import client
 from pickle import TRUE
@@ -15,8 +16,12 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
 
-def receive(conn, prefix):
-    conn.send(prefix.encode(FORMAT))
+def send(conn, msg):
+    conn.sendall(msg.encode(FORMAT))
+
+
+def receive(conn, msg):
+    send(conn, msg)
     return conn.recv(2048).decode(FORMAT)
 
 
@@ -28,8 +33,8 @@ def signupChecker(username, password):
     for x in username:
         if not x.isnumeric() and not x.isalpha():
             return 3
-    data = openFile()
-    for i in data['users']:
+    data = openFile("users")
+    for i in data:
         if i['username'] == username:
             return 4
     return 0
@@ -40,54 +45,91 @@ def writeFile(username, password):
         "username": username,
         "password": password,
     }
-    with open('data.json', 'r') as file:
+    with open('users.json', 'r') as file:
         data = json.load(file)
-    data['users'].append(user)
-    with open('data.json', 'w') as file:
+    data.append(user)
+    with open('users.json', 'w') as file:
         json.dump(data, file, indent=2)
 
 
-def openFile():
-    with open('data.json') as file:
+def openFile(str):
+    with open(f"{str}.json") as file:
         data = json.load(file)
     file.close()
     return data
 
 
 def signUpForm(conn):
-    conn.send("Sign Up Form".encode(FORMAT))
+    send(conn, "Sign Up Form")
     username = receive(conn, "Username: ")
     password = receive(conn, "Password: ")
     out = signupChecker(username, password)
     if out == 0:
-        conn.send("Sign up successfully".encode(FORMAT))
+        send(conn, "Sign up successfully")
         writeFile(username, password)
-    if out == 1:
-        conn.send("Username is too short".encode(FORMAT))
-    if out == 2:
-        conn.send("Password is too short".encode(FORMAT))
-    if out == 3:
-        conn.send("Username contains invalid character(s)".encode(FORMAT))
-    if out == 4:
-        conn.send("Username is already taken".encode(FORMAT))
+    elif out == 1:
+        send(conn, "Username is too short")
+    elif out == 2:
+        send(conn, "Password is too short")
+    elif out == 3:
+        send(conn, "Username contains invalid character(s)")
+    elif out == 4:
+        send(conn, "Username is already taken")
 
 
 def loginForm(conn):
-    conn.send("Login Form".encode(FORMAT))
+    send(conn, "Login Form")
     username = receive(conn, "Username: ")
     password = receive(conn, "Password: ")
-    data = openFile()
-    for i in data['users']:
+    data = openFile("users")
+    for i in data:
         if i['username'] == username and i['password'] == password:
             return 1, username
     return 0, username
+
+
+def sendFuncList(conn):
+    send(conn, "Functions list\n1. Add new note\n2. Show all notes\n3. Exit\nEnter number to continue")
+
+
+def writeNote(content, datatype, username):
+    with open('data.json', 'r') as file:
+        data = json.load(file)
+    for i in data:
+        if str(i) == username:
+            data[f'{username}'][f'{datatype}'].append(content)
+            with open('data.json', 'w') as file:
+                json.dump(data, file, indent=2)
+            return
+    data[f'{username}'] = {}
+    data[f'{username}']['notes'] = []
+    data[f'{username}']['imgs'] = []
+    data[f'{username}']['files'] = []
+    data[f'{username}'][f'{datatype}'].append(content)
+    with open('data.json', 'w') as file:
+        json.dump(data, file, indent=2)
+
+
+def addNote(conn, datatype, username):
+    note = receive(conn, "Enter new note:")
+    writeNote(note, datatype, username)
+    send(conn, "Add new note successfuly")
+
+
+def showNote(conn, username):
+    data = openFile("data")
+    note = ""
+    if username in data:
+        for i in data[f'{username}']['notes']:
+            note = note + i + '\n'
+        send(conn, note)
 
 
 def handle_client(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected.")
 
     while True:
-        conn.send('Would you like signup or login (signup/login)?'.encode(FORMAT))
+        send(conn, 'Would you like signup or login (signup/login)?')
         ans = conn.recv(2048).decode(FORMAT)
         if ans.lower() == 'signup':
             signUpForm(conn)
@@ -95,18 +137,23 @@ def handle_client(conn, addr):
         if ans.lower() == 'login':
             login, username = loginForm(conn)
             if login == 1:
-                conn.send('Login successfully'.encode(FORMAT))
+                send(conn, 'Login successfully')
                 connected = True
                 while connected:
-                    msg = conn.recv(2048).decode(FORMAT)
-                    if not msg:
-                        break
-                    if msg == DISCONNECT_MESSAGE:
+                    sendFuncList(conn)
+                    func = conn.recv(2048).decode(FORMAT)
+                    if func == "1":
+                        addNote(conn, "notes", username)
+                        time.sleep(1)
+                    elif func == "2":
+                        showNote(conn, username)
+                        time.sleep(1)
+                    elif func == "3":
                         connected = False
-                    print(f"{username}: {msg}")
+                
                 conn.close()
                 return
-            conn.send('Invalid username or password'.encode(FORMAT))
+            send(conn, 'Invalid username or password')
 
 
 def start():

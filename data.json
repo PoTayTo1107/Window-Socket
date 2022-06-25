@@ -1,12 +1,16 @@
 {
-  "users": [
-    {
-      "username": "Khoaa",
-      "password": "Khoaa"
-    },
-    {
-      "username": "NganLam",
-      "password": "NganLam"
-    }
-  ]
+  "NganLam": {
+    "notes": [
+      "Khoa",
+      "Khoaaa",
+      "Khoa1",
+      "Khoadtrai",
+      "Khoaaaaaaaaaa5",
+      "Khoa1",
+      "Khoa",
+      "Khoa"
+    ],
+    "imgs": [],
+    "files": []
+  }
 }
