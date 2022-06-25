@@ -104,11 +104,11 @@ def sendNote(conn):
     recvPrint(conn)
     send(conn, input())
     recvPrint(conn)
-    print('\n')
 
 
 def recvNote(conn):
     recvPrint(conn)
+    input()
 
 
 def start():
@@ -140,7 +140,7 @@ def start():
                 elif func == "2":
                     recvNote(conn)
                 elif func == "3":
-                    return
+                    exit()
 
 
 start()

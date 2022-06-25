@@ -120,9 +120,12 @@ def showNote(conn, username):
     data = openFile("data")
     note = ""
     if username in data:
-        for i in data[f'{username}']['notes']:
-            note = note + i + '\n'
-        send(conn, note)
+        if len(data[f'{username}']['notes']) == 0:
+            send(conn, "EMPTY")
+        else:
+            for i in data[f'{username}']['notes']:
+                note = note + i + '\n'
+            send(conn, note)
 
 
 def handle_client(conn, addr):
@@ -133,13 +136,11 @@ def handle_client(conn, addr):
         ans = conn.recv(2048).decode(FORMAT)
         if ans.lower() == 'signup':
             signUpForm(conn)
-
-        if ans.lower() == 'login':
+        elif ans.lower() == 'login':
             login, username = loginForm(conn)
             if login == 1:
                 send(conn, 'Login successfully')
-                connected = True
-                while connected:
+                while True:
                     sendFuncList(conn)
                     func = conn.recv(2048).decode(FORMAT)
                     if func == "1":
@@ -149,11 +150,10 @@ def handle_client(conn, addr):
                         showNote(conn, username)
                         time.sleep(1)
                     elif func == "3":
-                        connected = False
-                
-                conn.close()
-                return
-            send(conn, 'Invalid username or password')
+                        conn.close()
+                        return
+            else:
+                send(conn, 'Invalid username or password')
 
 
 def start():
