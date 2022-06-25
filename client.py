@@ -1,5 +1,6 @@
 import socket
 import time
+import os
 import tkinter
 import tkinter.scrolledtext
 import threading
@@ -92,8 +93,15 @@ def recvPrint(conn):
     print(conn.recv(2048).decode(FORMAT))
 
 
+def clscr():
+    os.system('cls')
+
+
+def cont():
+    input("Press Enter to Continue\n")
+
+
 def form(conn):
-    recvPrint(conn)
     recvPrint(conn)
     send(conn, input())
     recvPrint(conn)
@@ -104,43 +112,55 @@ def sendNote(conn):
     recvPrint(conn)
     send(conn, input())
     recvPrint(conn)
+    cont()
+    clscr()
 
 
 def recvNote(conn):
     recvPrint(conn)
-    input()
+    cont()
+    clscr()
 
 
 def start():
     answer = input('Would you like to connect (yes/no)?\n')
     if answer.lower() != 'yes':
         return
-
+    clscr()
     conn = connect()
 
     while True:
         recvPrint(conn)
         rec = input()
         send(conn, rec)
+        clscr()
 
         if rec.lower() == 'signup':
             form(conn)
             recvPrint(conn)
+            clscr()
 
         if rec.lower() == 'login':
             form(conn)
             noti = conn.recv(2048).decode(FORMAT)
             print(noti)
+            cont()
+            clscr()
             if noti == 'Login successfully':
-                recvPrint(conn)
-                func = input()
-                send(conn, func)
-                if func == "1":
-                    sendNote(conn)
-                elif func == "2":
-                    recvNote(conn)
-                elif func == "3":
-                    exit()
+                while True:
+                    recvPrint(conn)
+                    func = input()
+                    send(conn, func)
+                    clscr()
+                    if func == "1":
+                        sendNote(conn)
+                    elif func == "2":
+                        recvNote(conn)
+                    else:
+                        input('DISCONNECTED!')
+                        clscr()
+                        exit()
 
 
+clscr()
 start()
