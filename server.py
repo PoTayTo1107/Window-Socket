@@ -122,7 +122,8 @@ def handle_client(conn, addr):
                 print(f"[NEW CONNECTION] {list[1]} connected.")
                 print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
                 while True:
-                    pass
+                    msg = receive(conn)
+                    send(conn, msg)
                 # print(f"[DISCONNECTION] {list[1]} disconnected.")
                 # print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
 
