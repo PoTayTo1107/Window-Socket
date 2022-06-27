@@ -3,7 +3,7 @@ import gc
 import time
 import os
 import threading
-import tkinter
+import tkinter as tk
 import tkinter.scrolledtext
 import tkinter.messagebox
 from tkinter import *
@@ -35,20 +35,35 @@ class Client:
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
         tk.title("E-note")
-        tk.config(bg='#fff')
+        tk.config(bg='white')
+        tk.resizable(False, False)
 
-        self.img = ImageTk.PhotoImage(file="imgs/Notes.jpeg")
-        self.label = Label(tk, image=self.img).place(x=10, y=5)
+        window_height = 500
+        window_width = 900
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
 
-        self.login_button = Button(tk, text=' Log in ', command=lambda:
-                                   (tk.destroy(),
-                                    self.login_form()))
-        self.login_button.place(x=135, y=25)
+        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
+        self.label = Label(tk, image=self.img).place(x=0, y=0)
 
-        self.signup_button = Button(tk, text='Sign up', command=lambda:
-                                    (tk.destroy(),
-                                     self.signup_form()))
-        self.signup_button.place(x=135, y=65)
+        Label(tk, text="E-Note", bg="white",
+              font=("Times New Roman", 60, "bold")).place(x=590, y=120)
+
+        self.login_btn = ImageTk.PhotoImage(file="imgs/LogBtn.png")
+        self.login_button = Button(tk, image=self.login_btn, borderwidth=0,
+                                   command=lambda: (tk.destroy(),
+                                                    self.login_form()))
+        self.login_button.place(x=530, y=270)
+
+        self.signup_btn = ImageTk.PhotoImage(file="imgs/SignBtn.png")
+        self.signup_button = Button(tk, image=self.signup_btn, borderwidth=0,
+                                    command=lambda: (tk.destroy(),
+                                                     self.signup_form()))
+        self.signup_button.place(x=730, y=270)
 
         tk.mainloop()
 
@@ -72,9 +87,19 @@ class Client:
         global tk
         tk = Tk()
         tk.title("Log In")
+        tk.resizable(False, False)
 
-        Label(tk, text="Username: ").grid(column=0, row=0, sticky=W)
-        Label(tk, text="Password: ").grid(column=0, row=1, sticky=W)
+        window_height = 500
+        window_width = 900
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
+
+        Label(tk, text="Username: ").grid(column=0, row=0)
+        Label(tk, text="Password: ").grid(column=0, row=1)
 
         self.username = Entry(tk)
         self.username.grid(column=1, row=0, pady=2)
@@ -122,9 +147,19 @@ class Client:
         global tk
         tk = Tk()
         tk.title("Sign Up")
+        tk.resizable(False, False)
 
-        Label(tk, text="Username: ").grid(column=0, row=0, sticky=W)
-        Label(tk, text="Password: ").grid(column=0, row=1, sticky=W)
+        window_height = 500
+        window_width = 900
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
+
+        Label(tk, text="Username: ").grid(column=0, row=0)
+        Label(tk, text="Password: ").grid(column=0, row=1)
 
         self.username = Entry(tk)
         self.username.grid(column=1, row=0, pady=2)
@@ -147,6 +182,16 @@ class Client:
         tk.iconbitmap('imgs/notes.ico')
         tk.title("E-note")
         tk.config(bg='lightgray')
+        tk.resizable(False, False)
+
+        window_height = 620
+        window_width = 800
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
 
         self.chat_label = Label(tk, text='Chat: ', bg="lightgray")
         self.chat_label.config(state='disabled')
