@@ -1,4 +1,5 @@
 import socket
+import gc
 import time
 import os
 import threading
@@ -15,7 +16,6 @@ SERVER = "26.183.40.49"
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-FOLDER_PATH = r'C:/Users/anhkh/OneDrive/Documents/GitHub/Window-Socket'
 
 
 class Client:
@@ -26,7 +26,6 @@ class Client:
         self.sock.connect(ADDR)
 
         self.gui_done = False
-        self.running = True
 
         self.login_thread = threading.Thread(target=self.login_signup_picker)
         self.login_thread.start()
@@ -64,7 +63,7 @@ class Client:
                 "Notification", "Log in successfully")
             tk.destroy()
             self.nickname = username
-            self.gui_loop()
+            self.gui_loop(),
         else:
             tkinter.messagebox.showerror(
                 "Notification", "Invalid username or password")
@@ -164,7 +163,10 @@ class Client:
         self.input_area = Text(tk, height=3)
         self.input_area.pack(padx=20, pady=5)
 
-        self.send_button = Button(tk, text='Send', command=self.write)
+        self.send_button = Button(tk, text='Send', command=lambda:
+                                  (self.send(f"{self.nickname}: {self.input_area.get('1.0','end')}"),
+                                   self.input_area.delete('1.0', END),
+                                   self.receiveGui()))
         self.send_button.config(font=("Arial", 12))
         self.send_button.pack(padx=20, pady=5)
 
@@ -174,35 +176,23 @@ class Client:
 
         tk.mainloop()
 
-    def write(self):
-        message = f"{self.nickname}: {self.input_area.get('1.0','end')}"
-        print(message)
-        # self.send(message)
-        self.input_area.delete()
-
     def stop(self):
-        self.running = False
         tk.destroy()
         self.sock.close()
-        exit(0)
+        exit()
 
-    # def receiveGui(self):
-    #     while self.running:
-    #         try:
-    #             message = self.receive()
-    #             if message == 'NICK':
-    #                 self.send(self.nickname)
-    #             else:
-    #                 if self.gui_done:
-    #                     self.text_area.config(state='normal')
-    #                     self.text_area.insert('end', message)
-    #                     self.text_area.yview('end')
-    #                     self.text_area.config(state='disabled')
-    #         except ConnectionAbortedError:
-    #             break
-    #         except:
-    #             self.sock.close()
-    #             break
+    def receiveGui(self):
+        message = self.receive()
+        if self.gui_done:
+            self.text_area.config(state='normal')
+            self.text_area.insert('end', message)
+            self.text_area.yview('end')
+            self.text_area.config(state='disabled')
+        elif ConnectionAbortedError:
+            return
+        else:
+            self.sock.close()
+            return
 
     def send(self, msg):
         self.sock.send(msg.encode(FORMAT))
