@@ -15,11 +15,10 @@ server.bind(ADDR)
 
 
 def send(conn, msg):
-    conn.sendall(msg.encode(FORMAT))
+    conn.send(msg.encode(FORMAT))
 
 
-def receive(conn, msg):
-    send(conn, msg)
+def receive(conn):
     return conn.recv(2048).decode(FORMAT)
 
 
@@ -29,17 +28,17 @@ def clscr():
 
 def signupChecker(username, password):
     if (len(username) < 5):
-        return 1
+        return "1"
     if (len(password) < 3):
-        return 2
+        return "2"
     for x in username:
         if not x.isnumeric() and not x.isalpha():
-            return 3
+            return "3"
     data = openFile("users")
     for i in data:
         if i['username'] == username:
-            return 4
-    return 0
+            return "4"
+    return "0"
 
 
 def writeFile(username, password):
@@ -61,28 +60,17 @@ def openFile(str):
     return data
 
 
-def signUpForm(conn):
-    send(conn, "Sign Up Form\n")
-    username = receive(conn, "Username: ")
-    password = receive(conn, "Password: ")
+def signupExe(conn, username, password):
     out = signupChecker(username, password)
-    if out == 0:
-        send(conn, "Sign up successfully")
+    send(conn, out)
+    if out == "0":
         writeFile(username, password)
-    elif out == 1:
-        send(conn, "Username is too short")
-    elif out == 2:
-        send(conn, "Password is too short")
-    elif out == 3:
-        send(conn, "Username contains invalid character(s)")
-    elif out == 4:
-        send(conn, "Username is already taken")
 
 
 def loginForm(conn):
     send(conn, "Login Form\n")
-    username = receive(conn, "Username: ")
-    password = receive(conn, "Password: ")
+    username = receive(conn)
+    password = receive(conn)
     data = openFile("users")
     for i in data:
         if i['username'] == username and i['password'] == password:
@@ -120,7 +108,6 @@ def addNote(conn, datatype, username):
 
 def showNote(conn, username):
     data = openFile("data")
-    note = ""
     if username in data:
         if len(data[f'{username}']['notes']) == 0:
             send(conn, "EMPTY")
@@ -130,35 +117,34 @@ def showNote(conn, username):
 
 
 def handle_client(conn, addr):
-    pass
-    # while True:
-    #     send(conn, "Would you like signup or login (signup/login)?")
-    #     ans = conn.recv(2048).decode(FORMAT)
-    #     if ans.lower() == "signup":
-    #         signUpForm(conn)
-    #     elif ans.lower() == "login":
-    #         login, username = loginForm(conn)
-    #         if login == 1:
-    #             send(conn, "Login successfully")
-    #             print(f"[NEW CONNECTION] {username} connected.")
-    #             print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
-    #             while True:
-    #                 sendFuncList(conn)
-    #                 func = conn.recv(2048).decode(FORMAT)
-    #                 if func == "1":
-    #                     addNote(conn, "notes", username)
-    #                     time.sleep(1)
-    #                 elif func == "2":
-    #                     showNote(conn, username)
-    #                     time.sleep(1)
-    #                 else:
-    #                     conn.close()
-    #                     print(f"[DISCONNECTION] {username} disconnected.")
-    #                     print(
-    #                         f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
-    #                     return
-    #         else:
-    #             send(conn, "Invalid username or password")
+    list = receive(conn)
+    list = eval(list)
+    print(list)
+    if list[0] == "Sign up":
+        signupExe(conn, list[1], list[2])
+    elif list[0] == "Log in":
+        login, username = loginForm(conn)
+        if login == 1:
+            send(conn, "Login successfully")
+            print(f"[NEW CONNECTION] {username} connected.")
+            print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+            while True:
+                sendFuncList(conn)
+                func = receive(conn)
+                if func == "1":
+                    addNote(conn, "notes", username)
+                    time.sleep(1)
+                elif func == "2":
+                    showNote(conn, username)
+                    time.sleep(1)
+                else:
+                    conn.close()
+                    print(f"[DISCONNECTION] {username} disconnected.")
+                    print(
+                        f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
+                    return
+        else:
+            send(conn, "Invalid username or password")
 
 
 def start():
