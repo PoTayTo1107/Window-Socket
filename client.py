@@ -29,14 +29,8 @@ class Client:
         self.gui_done = False
         self.running = True
 
-        login_thread = threading.Thread(target=self.login_signup_picker)
-        login_thread.start()
-
-        # gui_thread = threading.Thread(target=self.gui_loop)
-        # receive_thread = threading.Thread(target=self.receiveGui)
-
-        # gui_thread.start()
-        # receive_thread.start()
+        self.login_thread = threading.Thread(target=self.login_signup_picker)
+        self.login_thread.start()
 
     def login_signup_picker(self):
         self.tk = Tk()
@@ -48,71 +42,73 @@ class Client:
         self.img = ImageTk.PhotoImage(file="imgs/Notes.jpeg")
         self.label = Label(self.tk, image=self.img).place(x=10, y=5)
 
-        self.login_button = Button(self.tk, text=' Log in ', command=lambda:
-                                   (lambda x: self.tk.destroy())
-                                   )
+        self.login_button = Button(
+            self.tk, text=' Log in ', command=lambda:
+                (self.tk.destroy(),
+                 self.login_form()))
         self.login_button.place(x=135, y=25)
 
-        self.signup_button = Button(self.tk, text='Sign up', command=lambda:
-                                    (lambda x: self.tk.destroy())
-                                    )
+        self.signup_button = Button(
+            self.tk, text='Sign up', command=lambda:
+                (self.tk.destroy(),
+                 self.signup_form()))
         self.signup_button.place(x=135, y=65)
 
         self.tk.mainloop()
 
     def login_form(self):
-        creds = []
-        tk = Tk()
-        tk.geometry('220x80')
-        tk.title("Log In")
+        self.creds = []
+        self.tk = Tk()
+        self.tk.geometry('220x80')
+        self.tk.title("Log In")
 
-        Label(tk, text="Username: ").grid(column=0, row=0, sticky=W)
-        Label(tk, text="Password: ").grid(column=0, row=1, sticky=W)
+        Label(self.tk, text="Username: ").grid(column=0, row=0, sticky=W)
+        Label(self.tk, text="Password: ").grid(column=0, row=1, sticky=W)
 
-        username = Entry(tk)
-        username.grid(column=1, row=0, pady=2)
-        username.focus_set()
+        self.username = Entry(self.tk)
+        self.username.grid(column=1, row=0, pady=2)
+        self.username.focus_set()
 
-        password = Entry(tk, show='*')
-        password.grid(column=1, row=1, pady=2)
-        username.bind('<Return>', lambda x: password.focus_set())
+        self.password = Entry(self.tk, show='*')
+        self.password.grid(column=1, row=1, pady=2)
+        self.username.bind('<Return>', lambda x: self.password.focus_set())
 
-        button = Button(tk, text='Log in!', command=lambda:
-                        (lambda x: tk.destroy())
-                        (creds.extend([username.get(), password.get()]))
+        self.button = Button(self.tk, text='Log in!', command=lambda:
+                        (lambda x: self.tk.destroy())
+                        (self.creds.extend([self.username.get(), self.password.get()]))
                         )
-        button.grid(column=0, row=2, columnspan=2, pady=5)
-        password.bind('<Return>', lambda x: button.invoke())
+        self.button.grid(column=0, row=2, columnspan=2, pady=5)
+        self.password.bind('<Return>', lambda x: self.button.invoke())
 
-        tk.mainloop()
+        self.tk.mainloop()
 
-        return creds if creds else None
+        return self.creds if self.creds else None
 
     def signup_form(self):
-        creds = []
-        tk = Tk()
-        tk.geometry('240x80')
-        tk.title("Sign Up")
+        self.creds = []
+        self.tk = Tk()
+        self.tk.geometry('220x80')
+        self.tk.title("Sign Up")
 
-        Label(tk, text="Username: ").grid(column=0, row=0, sticky=W)
-        Label(tk, text="Password: ").grid(column=0, row=1, sticky=W)
+        Label(self.tk, text="Username: ").grid(column=0, row=0, sticky=W)
+        Label(self.tk, text="Password: ").grid(column=0, row=1, sticky=W)
 
-        username = Entry(tk)
-        username.grid(column=1, row=0, pady=2)
-        username.focus_set()
+        self.username = Entry(self.tk)
+        self.username.grid(column=1, row=0, pady=2)
+        self.username.focus_set()
 
-        password = Entry(tk, show='*')
-        password.grid(column=1, row=1, pady=2)
-        username.bind('<Return>', lambda x: password.focus_set())
+        self.password = Entry(self.tk, show='*')
+        self.password.grid(column=1, row=1, pady=2)
+        self.username.bind('<Return>', lambda x: self.password.focus_set())
 
-        button = Button(tk, text='Log in!', command=lambda: (
-            lambda x: tk.destroy())(creds.extend([username.get(), password.get()])))
-        button.grid(column=0, row=2, columnspan=2, pady=5)
-        password.bind('<Return>', lambda x: button.invoke())
+        self.button = Button(self.tk, text='Sign up', command=lambda: (
+            lambda x: self.tk.destroy())(self.creds.extend([self.username.get(), self.password.get()])))
+        self.button.grid(column=0, row=2, columnspan=2, pady=5)
+        self.password.bind('<Return>', lambda x: self.button.invoke())
 
-        tk.mainloop()
+        self.tk.mainloop()
 
-        return creds if creds else None
+        return self.creds if self.creds else None
 
     def gui_loop(self):
         self.win = Tk()
