@@ -26,6 +26,25 @@ def clscr():
     os.system('cls')
 
 
+def openFile(str):
+    with open(f"{str}.json") as file:
+        data = json.load(file)
+    file.close()
+    return data
+
+
+def writeFile(username, password):
+    user = {
+        "username": username,
+        "password": password,
+    }
+    with open("users.json", "r") as file:
+        data = json.load(file)
+    data.append(user)
+    with open("users.json", "w") as file:
+        json.dump(data, file, indent=2)
+
+
 def signupChecker(username, password):
     if (len(username) < 5):
         return "1"
@@ -41,25 +60,6 @@ def signupChecker(username, password):
     return "0"
 
 
-def writeFile(username, password):
-    user = {
-        "username": username,
-        "password": password,
-    }
-    with open("users.json", "r") as file:
-        data = json.load(file)
-    data.append(user)
-    with open("users.json", "w") as file:
-        json.dump(data, file, indent=2)
-
-
-def openFile(str):
-    with open(f"{str}.json") as file:
-        data = json.load(file)
-    file.close()
-    return data
-
-
 def signupExe(conn, username, password):
     out = signupChecker(username, password)
     send(conn, out)
@@ -67,19 +67,18 @@ def signupExe(conn, username, password):
         writeFile(username, password)
 
 
-def loginForm(conn):
-    send(conn, "Login Form\n")
-    username = receive(conn)
-    password = receive(conn)
+def loginExe(conn, username, password):
     data = openFile("users")
     for i in data:
         if i['username'] == username and i['password'] == password:
-            return 1, username
-    return 0, username
+            return "0"
+    return "1"
 
 
-def sendFuncList(conn):
-    send(conn, "Functions list\n1. Add new note\n2. Show all notes\nAny other key to exit\n")
+def addNote(conn, datatype, username):
+    note = receive(conn, "Enter new note:")
+    writeNote(note, datatype, username)
+    send(conn, "Add new note successfuly")
 
 
 def writeNote(content, datatype, username):
@@ -100,12 +99,6 @@ def writeNote(content, datatype, username):
         json.dump(data, file, indent=2)
 
 
-def addNote(conn, datatype, username):
-    note = receive(conn, "Enter new note:")
-    writeNote(note, datatype, username)
-    send(conn, "Add new note successfuly")
-
-
 def showNote(conn, username):
     data = openFile("data")
     if username in data:
@@ -117,34 +110,21 @@ def showNote(conn, username):
 
 
 def handle_client(conn, addr):
-    list = receive(conn)
-    list = eval(list)
-    print(list)
-    if list[0] == "Sign up":
-        signupExe(conn, list[1], list[2])
-    elif list[0] == "Log in":
-        login, username = loginForm(conn)
-        if login == 1:
-            send(conn, "Login successfully")
-            print(f"[NEW CONNECTION] {username} connected.")
-            print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
-            while True:
-                sendFuncList(conn)
-                func = receive(conn)
-                if func == "1":
-                    addNote(conn, "notes", username)
-                    time.sleep(1)
-                elif func == "2":
-                    showNote(conn, username)
-                    time.sleep(1)
-                else:
-                    conn.close()
-                    print(f"[DISCONNECTION] {username} disconnected.")
-                    print(
-                        f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
-                    return
-        else:
-            send(conn, "Invalid username or password")
+    while True:
+        list = receive(conn)
+        list = eval(list)
+        if list[0] == "Sign up":
+            signupExe(conn, list[1], list[2])
+        elif list[0] == "Log in":
+            out = loginExe(conn, list[1], list[2])
+            send(conn, out)
+            if out == "0":
+                print(f"[NEW CONNECTION] {list[1]} connected.")
+                print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+                while True:
+                    pass
+                # print(f"[DISCONNECTION] {list[1]} disconnected.")
+                # print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
 
 
 def start():
