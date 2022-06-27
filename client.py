@@ -4,10 +4,9 @@ import os
 import threading
 import tkinter
 import tkinter.scrolledtext
-from tkinter import simpledialog
+import tkinter.messagebox
 from tkinter import *
 import PIL
-import numpy
 from PIL import ImageTk, Image
 from pathlib import Path
 
@@ -33,89 +32,83 @@ class Client:
         self.login_thread.start()
 
     def login_signup_picker(self):
-        self.tk = Tk()
-        self.tk.iconbitmap('imgs/notes.ico')
-        self.tk.title("E-note")
-        self.tk.config(bg='#fff')
-        self.tk.geometry('210x115')
+        global tk
+        tk = Tk()
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("E-note")
+        tk.config(bg='#fff')
 
         self.img = ImageTk.PhotoImage(file="imgs/Notes.jpeg")
-        self.label = Label(self.tk, image=self.img).place(x=10, y=5)
+        self.label = Label(tk, image=self.img).place(x=10, y=5)
 
-        self.login_button = Button(
-            self.tk, text=' Log in ', command=lambda:
-                (self.tk.destroy(),
-                 self.login_form()))
+        self.login_button = Button(tk, text=' Log in ', command=lambda:
+                                   (tk.destroy(),
+                                    self.login_form()))
         self.login_button.place(x=135, y=25)
 
-        self.signup_button = Button(
-            self.tk, text='Sign up', command=lambda:
-                (self.tk.destroy(),
-                 self.signup_form()))
+        self.signup_button = Button(tk, text='Sign up', command=lambda:
+                                    (tk.destroy(),
+                                     self.signup_form()))
         self.signup_button.place(x=135, y=65)
 
-        self.tk.mainloop()
+        tk.mainloop()
 
     def login_form(self):
-        self.creds = []
-        self.tk = Tk()
-        self.tk.geometry('220x80')
-        self.tk.title("Log In")
+        global tk
+        tk = Tk()
+        tk.title("Log In")
 
-        Label(self.tk, text="Username: ").grid(column=0, row=0, sticky=W)
-        Label(self.tk, text="Password: ").grid(column=0, row=1, sticky=W)
+        Label(tk, text="Username: ").grid(column=0, row=0, sticky=W)
+        Label(tk, text="Password: ").grid(column=0, row=1, sticky=W)
 
-        self.username = Entry(self.tk)
+        self.username = Entry(tk)
         self.username.grid(column=1, row=0, pady=2)
         self.username.focus_set()
 
-        self.password = Entry(self.tk, show='*')
+        self.password = Entry(tk, show='*')
         self.password.grid(column=1, row=1, pady=2)
         self.username.bind('<Return>', lambda x: self.password.focus_set())
 
-        self.button = Button(self.tk, text='Log in!', command=lambda:
-                        (lambda x: self.tk.destroy())
-                        (self.creds.extend([self.username.get(), self.password.get()]))
-                        )
+        self.button = Button(tk, text=' Log in ', command=lambda:
+                             (self.send(self.username.get()),
+                              self.send(self.password.get()),
+                              tk.destroy()))
         self.button.grid(column=0, row=2, columnspan=2, pady=5)
         self.password.bind('<Return>', lambda x: self.button.invoke())
 
-        self.tk.mainloop()
+        tk.mainloop()
 
-        return self.creds if self.creds else None
+        if self.creds:
+            self.send(self.creds)
 
     def signup_form(self):
-        self.creds = []
-        self.tk = Tk()
-        self.tk.geometry('220x80')
-        self.tk.title("Sign Up")
+        global tk
+        tk = Tk()
+        tk.title("Sign Up")
 
-        Label(self.tk, text="Username: ").grid(column=0, row=0, sticky=W)
-        Label(self.tk, text="Password: ").grid(column=0, row=1, sticky=W)
+        Label(tk, text="Username: ").grid(column=0, row=0, sticky=W)
+        Label(tk, text="Password: ").grid(column=0, row=1, sticky=W)
 
-        self.username = Entry(self.tk)
+        self.username = Entry(tk)
         self.username.grid(column=1, row=0, pady=2)
         self.username.focus_set()
 
-        self.password = Entry(self.tk, show='*')
+        self.password = Entry(tk, show='*')
         self.password.grid(column=1, row=1, pady=2)
-        self.username.bind('<Return>', lambda x: self.password.focus_set())
+        self.username.bind('<Return>', lambda: self.password.focus_set())
 
-        self.button = Button(self.tk, text='Sign up', command=lambda: (
-            lambda x: self.tk.destroy())(self.creds.extend([self.username.get(), self.password.get()])))
+        self.button = Button(tk, text='Sign up',
+                             command=lambda: (self.signupExe()))
         self.button.grid(column=0, row=2, columnspan=2, pady=5)
-        self.password.bind('<Return>', lambda x: self.button.invoke())
+        self.password.bind('<Return>', lambda: self.button.invoke())
 
-        self.tk.mainloop()
-
-        return self.creds if self.creds else None
+        tk.mainloop()
 
     def gui_loop(self):
         self.win = Tk()
         self.win.configure(bg="lightgray")
 
-        self.chat_label = Label(
-            self.win, text='Chat: ', bg="lightgray")
+        self.chat_label = Label(self.win, text='Chat: ', bg="lightgray")
         self.chat_label.config(state='disabled')
         self.chat_label.pack(padx=20, pady=5)
 
@@ -123,16 +116,14 @@ class Client:
         self.text_area.config(font=("Arial", 12))
         self.text_area.pack(padx=20, pady=5)
 
-        self.msg_label = Label(
-            self.win, text='Message: ', bg="lightgray")
+        self.msg_label = Label(self.win, text='Message: ', bg="lightgray")
         self.msg_label.config(state='disabled')
         self.msg_label.pack(padx=20, pady=5)
 
         self.input_area = Text(self.win, height=3)
         self.input_area.pack(padx=20, pady=5)
 
-        self.send_button = Button(
-            self.win, text='Send', command=self.write)
+        self.send_button = Button(self.win, text='Send', command=self.write)
         self.send_button.config(font=("Arial", 12))
         self.send_button.pack(padx=20, pady=5)
 
@@ -172,19 +163,39 @@ class Client:
                 break
 
     def send(self, msg):
-        self.sock.sendall(msg.encode(FORMAT))
+        self.sock.send(msg.encode(FORMAT))
 
     def receive(self):
         return self.sock.recv(2048).decode(FORMAT)
 
-    def cont(self):
-        input("Press Enter to Continue\n")
+    def signupExe(self):
+        username = self.username.get()
+        password = self.password.get()
+        list = str(["Sign up", username, password])
+        self.send(list)
+        out = self.receive()
+        print(out)
+        if out == "0":
+            tkinter.messagebox.showinfo(
+                "Notification", "Sign up successfully")
+        elif out == "1":
+            tkinter.messagebox.showerror(
+                "Notification", "Username is too short")
+        elif out == "2":
+            tkinter.messagebox.showerror(
+                "Notification", "Password is too short")
+        elif out == "3":
+            tkinter.messagebox.showerror(
+                "Notification", "Username contains invalid character(s)")
+        elif out == "4":
+            tkinter.messagebox.showerror(
+                "Notification", "Username is already taken")
+        else:
+            tkinter.messagebox.showerror(
+                "Notification", "ERROR!")
 
-    def form(self):
-        print(self.receive)
-        self.send(input())
-        print(self.receive)
-        self.send(input())
+        tk.destroy()
+        self.login_signup_picker()
 
     def sendNote(self):
         print(self.receive)
@@ -195,34 +206,6 @@ class Client:
     def recvNote(self):
         print(self.receive)
         self.cont
-
-    def starting(self):
-        while True:
-            print(self.receive)
-            rec = input()
-            self.send(rec)
-
-            if rec.lower() == "signup":
-                self.form
-                print(self.receive)
-
-            if rec.lower() == "login":
-                self.form
-                noti = self.receive
-                print(noti)
-                self.cont
-                if noti == "Login successfully":
-                    while True:
-                        print(self.receive)
-                        func = input()
-                        self.send(func)
-                        if func == "1":
-                            self.sendNote
-                        elif func == "2":
-                            self.recvNote
-                        else:
-                            input("DISCONNECTED!")
-                            exit()
 
 
 client = Client()
