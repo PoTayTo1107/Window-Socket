@@ -1,7 +1,23 @@
 {
   "Anhkhoa": {
-    "title": [],
-    "notes": [],
+    "title": [
+      "Khoa",
+      "Anhkhoa"
+    ],
+    "notes": [
+      "Khoa",
+      "Anhkhoa"
+    ],
+    "imgs": [],
+    "files": []
+  },
+  "NganLam": {
+    "title": [
+      "Khoa"
+    ],
+    "notes": [
+      "Khoa"
+    ],
     "imgs": [],
     "files": []
   }

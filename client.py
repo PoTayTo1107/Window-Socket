@@ -82,7 +82,7 @@ class Client:
                 "Notification", "Log in successfully")
             tk.destroy()
             self.nickname = username
-            self.gui_loop(),
+            self.functionGui(),
         else:
             tkinter.messagebox.showerror(
                 "Error", "Invalid username or password")
@@ -225,22 +225,21 @@ class Client:
                              borderwidth=0, highlightthickness=0,
                              command=lambda: (self.signupExe()))
         self.button.place(x=625, y=345)
-        self.password.bind('<Return>', lambda x: (self.button.invoke()))
 
         tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
-    def gui_loop(self):
+    def functionGui(self):
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
-        tk.title("E-note")
-        tk.config(bg='lightgray')
+        tk.title("FUNCTIONS")
+        tk.config(bg='white')
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
 
-        window_height = 720
-        window_width = 800
+        window_height = 500
+        window_width = 900
         screen_width = tk.winfo_screenwidth()
         screen_height = tk.winfo_screenheight()
         x_cordinate = int((screen_width/2) - (window_width/2))
@@ -248,11 +247,114 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
+        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
+        Label(tk, image=self.img, borderwidth=0,
+              highlightthickness=0).place(x=0, y=0)
+
+        Label(tk, text="FUNCTIONS", bg="white", fg="#39c3e2",
+              font=("helvetica", 40, "bold")).place(x=550, y=100)
+
+        self.addnote_btn_img = ImageTk.PhotoImage(file="imgs/Addnote.png")
+        self.addnote_btn = Button(tk, image=self.addnote_btn_img,
+                                  borderwidth=0, highlightthickness=0,
+                                  command=lambda: (tk.destroy(), self.addNoteGui()))
+        self.addnote_btn.place(x=625, y=200)
+
+        self.addimg_btn_img = ImageTk.PhotoImage(file="imgs/Addimg.png")
+        self.addimg_btn = Button(tk, image=self.addimg_btn_img,
+                                 borderwidth=0, highlightthickness=0,
+                                 command=lambda: (self.signupExe()))
+        self.addimg_btn.place(x=625, y=260)
+
+        self.addfile_btn_img = ImageTk.PhotoImage(file="imgs/Addfile.png")
+        self.addfile_btn = Button(tk, image=self.addfile_btn_img,
+                                  borderwidth=0, highlightthickness=0,
+                                  command=lambda: (self.signupExe()))
+        self.addfile_btn.place(x=625, y=320)
+
+        tk.protocol("WM_DELETE_WINDOW", self.disStop)
+        tk.mainloop()
+
+    def addNoteExe(self):
+        title = self.input_title.get('1.0', 'end')
+        message = self.input_area.get('1.0', 'end')
+        if title != "" and message != "":
+            self.input_title.delete('1.0', END)
+            self.input_area.delete('1.0', END)
+            tk.destroy()
+            title = title[:-1]
+            message = message[:-1]
+            self.send(str(["note", title, message]))
+            tkinter.messagebox.showinfo(
+                "Notification", "Add text successfully")
+            self.functionGui()
+        else:
+            tkinter.messagebox.showerror(
+                "ERROR", "Cannot leave title or message empty!")
+
+    def addNoteGui(self):
+        global tk
+        tk = Tk()
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("ADD NOTE")
+        tk.config(bg='lightgray')
+        tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
+
+        window_height = 300
+        window_width = 400
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2)) - 20
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
+
+        self.input_title = Text(tk, height=1)
+        self.input_title.pack(padx=20, pady=3)
+
+        self.input_area = Text(tk, height=4)
+        self.input_area.pack(padx=20, pady=5)
+
+        self.send_note_button = Button(
+            tk, text='Add', command=lambda: self.addNoteExe())
+        self.send_note_button.config(font=("Arial", 12))
+        self.send_note_button.pack(side=RIGHT, padx=20, pady=5)
+
+        tk.protocol("WM_DELETE_WINDOW", self.disStop)
+
+        tk.mainloop()
+
+    def showNoteExe(self):
+        tk.destroy()
+        self.text_area.config(state='normal')
+       # self.text_area.insert('end', f"Title:\n{title}\nNote:\n{message}")
+        self.text_area.yview('end')
+        self.text_area.config(state='disabled')
+
+    def showNoteGui(self):
+        global tk
+        tk = Tk()
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("E-note")
+        tk.config(bg='white')
+        tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
+
+        window_height = 700
+        window_width = 800
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2)) - 20
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
+
         self.chat_label = Label(tk, text='Chat: ', bg="lightgray")
         self.chat_label.config(state='disabled')
         self.chat_label.pack(padx=20, pady=5)
 
-        self.text_area = tkinter.scrolledtext.ScrolledText(tk)
+        self.text_area = Listbox(tk)
         self.text_area.config(font=("Arial", 12))
         self.text_area.pack(padx=20, pady=5)
 
@@ -260,22 +362,21 @@ class Client:
         self.msg_label.config(state='disabled')
         self.msg_label.pack(padx=20, pady=5)
 
-        self.input_title = Text(tk, height=3)
-        self.input_title.pack(padx=20, pady=5)
+        self.send_img_button = Button(
+            tk, text='Delete note', command=lambda: self.receiveNoteGui())
+        self.send_img_button.config(font=("Arial", 12))
+        self.send_img_button.pack(side=RIGHT, padx=20, pady=5)
 
-        self.input_area = Text(tk, height=3)
-        self.input_area.pack(padx=20, pady=5)
+        self.send_file_button = Button(
+            tk, text='Show all notes', command=lambda: self.receiveNoteGui())
+        self.send_file_button.config(font=("Arial", 12))
+        self.send_file_button.pack(side=RIGHT, padx=20, pady=5)
 
-        self.send_button = Button(
-            tk, text='Send', command=lambda: self.receiveNoteGui())
-        self.send_button.config(font=("Arial", 12))
-        self.send_button.pack(padx=20, pady=5)
-
-        tk.protocol("WM_DELETE_WINDOW", self.gui_loop_stop)
+        tk.protocol("WM_DELETE_WINDOW", self.disStop)
 
         tk.mainloop()
 
-    def gui_loop_stop(self):
+    def disStop(self):
         self.send(str([DISCONNECT_MESSAGE]))
         self.sock.close()
         exit(0)
@@ -284,18 +385,6 @@ class Client:
         self.send(str([""]))
         self.sock.close()
         exit(0)
-
-    def receiveNoteGui(self):
-        title = self.input_title.get('1.0', 'end')
-        message = self.input_area.get('1.0', 'end')
-        self.send(str(["note",title, message]))
-        self.input_title.delete('1.0', END)
-        self.input_area.delete('1.0', END)
-
-        self.text_area.config(state='normal')
-        self.text_area.insert('end', f"{title}: {message}")
-        self.text_area.yview('end')
-        self.text_area.config(state='disabled')
 
     def send(self, msg):
         self.sock.send(msg.encode(FORMAT))
