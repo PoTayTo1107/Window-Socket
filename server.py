@@ -124,8 +124,12 @@ def handle_client(conn, addr):
                 while True:
                     msg = receive(conn)
                     send(conn, msg)
+
                 # print(f"[DISCONNECTION] {list[1]} disconnected.")
                 # print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
+        else:
+            conn.close()
+            break
 
 
 def start():
