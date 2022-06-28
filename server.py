@@ -23,10 +23,6 @@ def receive(conn):
     return conn.recv(2048).decode(FORMAT)
 
 
-def clscr():
-    os.system('cls')
-
-
 def openFile(str):
     with open(f"{str}.json") as file:
         data = json.load(file)
@@ -82,30 +78,30 @@ def writeDataFile(username, msg_list):
     if username not in data:
         data[f'{username}'] = {}
         data[f'{username}']['title'] = []
-        data[f'{username}']['notes'] = []
-        data[f'{username}']['imgs'] = []
-        data[f'{username}']['files'] = []
-    else:
-        if msg_list[0] == 'note':
-            data[f'{username}']['title'].append(msg_list[1])
-            data[f'{username}']['notes'].append(msg_list[2])
-        elif msg_list[0] == 'imgs':
-            pass
-        elif msg_list[0] == 'files':
-            pass
+        data[f'{username}']['note'] = []
+        data[f'{username}']['img'] = []
+        data[f'{username}']['file'] = []
+
+    if msg_list[0] == 'note':
+        data[f'{username}']['title'].append(msg_list[1])
+        data[f'{username}']['note'].append(msg_list[2])
+    elif msg_list[0] == 'img':
+        data[f'{username}']['img'].append(msg_list[1])
+    elif msg_list[0] == 'file':
+        data[f'{username}']['file'].append(msg_list[1])
     with open("userdata/data.json", "w") as file:
         json.dump(data, file, indent=2)
 
 
-def showNote(conn, username):
-    with open("userdata/data.json", "r") as file:
-        data = json.load(file)
-    if username in data:
-        if len(data[f'{username}']['notes']) == 0:
-            send(conn, "EMPTY")
-        else:
-            for i in data[f'{username}']['notes']:
-                send(conn, i + '\n')
+# def showNote(conn, username):
+#     with open("userdata/data.json", "r") as file:
+#         data = json.load(file)
+#     if username in data:
+#         if len(data[f'{username}']['notes']) == 0:
+#             send(conn, "EMPTY")
+#         else:
+#             for i in data[f'{username}']['notes']:
+#                 send(conn, i + '\n')
 
 
 def handle_client(conn, addr):
@@ -134,7 +130,7 @@ def handle_client(conn, addr):
 
 
 def start():
-    clscr()
+    os.system('cls')
     server.listen()
     print("[STARTING] Server is starting...")
     print(f"[LISTENING] Server is listening on {SERVER}")
