@@ -7,6 +7,7 @@ import tkinter as tk
 import tkinter.scrolledtext
 import tkinter.messagebox
 from tkinter import *
+from tkinter.filedialog import askdirectory
 import PIL
 from PIL import ImageTk, Image
 from pathlib import Path
@@ -24,9 +25,7 @@ class Client:
         os.system('cls')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect(ADDR)
-
-        self.gui_done = False
-
+        #path = askdirectory(title='Select Folder')
         self.login_thread = threading.Thread(target=self.login_signup_picker)
         self.login_thread.start()
 
@@ -240,7 +239,7 @@ class Client:
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
 
-        window_height = 620
+        window_height = 720
         window_width = 800
         screen_width = tk.winfo_screenwidth()
         screen_height = tk.winfo_screenheight()
@@ -261,24 +260,23 @@ class Client:
         self.msg_label.config(state='disabled')
         self.msg_label.pack(padx=20, pady=5)
 
+        self.input_title = Text(tk, height=3)
+        self.input_title.pack(padx=20, pady=5)
+
         self.input_area = Text(tk, height=3)
         self.input_area.pack(padx=20, pady=5)
 
-        self.send_button = Button(tk, text='Send', command=lambda:
-                                  (self.send(f"{self.nickname}: {self.input_area.get('1.0','end')}"),
-                                   self.input_area.delete('1.0', END),
-                                   self.receiveGui()))
+        self.send_button = Button(
+            tk, text='Send', command=lambda: self.receiveNoteGui())
         self.send_button.config(font=("Arial", 12))
         self.send_button.pack(padx=20, pady=5)
-
-        self.gui_done = True
 
         tk.protocol("WM_DELETE_WINDOW", self.gui_loop_stop)
 
         tk.mainloop()
 
     def gui_loop_stop(self):
-        self.send(DISCONNECT_MESSAGE)
+        self.send(str([DISCONNECT_MESSAGE]))
         self.sock.close()
         exit(0)
 
@@ -287,18 +285,17 @@ class Client:
         self.sock.close()
         exit(0)
 
-    def receiveGui(self):
-        message = self.receive()
-        if self.gui_done:
-            self.text_area.config(state='normal')
-            self.text_area.insert('end', message)
-            self.text_area.yview('end')
-            self.text_area.config(state='disabled')
-        elif ConnectionAbortedError:
-            return
-        else:
-            self.sock.close()
-            return
+    def receiveNoteGui(self):
+        title = self.input_title.get('1.0', 'end')
+        message = self.input_area.get('1.0', 'end')
+        self.send(str(["note",title, message]))
+        self.input_title.delete('1.0', END)
+        self.input_area.delete('1.0', END)
+
+        self.text_area.config(state='normal')
+        self.text_area.insert('end', f"{title}: {message}")
+        self.text_area.yview('end')
+        self.text_area.config(state='disabled')
 
     def send(self, msg):
         self.sock.send(msg.encode(FORMAT))
