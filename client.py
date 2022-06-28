@@ -34,9 +34,10 @@ class Client:
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
-        tk.title("E-note")
+        tk.title("E-NOTE")
         tk.config(bg='white')
         tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
 
         window_height = 500
         window_width = 900
@@ -48,23 +49,27 @@ class Client:
                     window_height, x_cordinate, y_cordinate))
 
         self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
-        self.label = Label(tk, image=self.img).place(x=0, y=0)
+        self.label = Label(tk, image=self.img, borderwidth=0,
+                           highlightthickness=0).place(x=0, y=0)
 
         Label(tk, text="E-Note", bg="white",
-              font=("Times New Roman", 60, "bold")).place(x=590, y=120)
+              font=("Times New Roman", 60, "bold")).place(x=585, y=120)
 
         self.login_btn = ImageTk.PhotoImage(file="imgs/LogBtn.png")
-        self.login_button = Button(tk, image=self.login_btn, borderwidth=0,
+        self.login_button = Button(tk, image=self.login_btn,
+                                   borderwidth=0, highlightthickness=0,
                                    command=lambda: (tk.destroy(),
                                                     self.login_form()))
         self.login_button.place(x=530, y=270)
 
         self.signup_btn = ImageTk.PhotoImage(file="imgs/SignBtn.png")
-        self.signup_button = Button(tk, image=self.signup_btn, borderwidth=0,
+        self.signup_button = Button(tk, image=self.signup_btn,
+                                    borderwidth=0, highlightthickness=0,
                                     command=lambda: (tk.destroy(),
                                                      self.signup_form()))
-        self.signup_button.place(x=730, y=270)
+        self.signup_button.place(x=720, y=270)
 
+        tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
     def loginExe(self):
@@ -86,8 +91,11 @@ class Client:
     def login_form(self):
         global tk
         tk = Tk()
-        tk.title("Log In")
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("LOGIN")
+        tk.config(bg='white')
         tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
 
         window_height = 500
         window_width = 900
@@ -98,22 +106,44 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
-        Label(tk, text="Username: ").grid(column=0, row=0)
-        Label(tk, text="Password: ").grid(column=0, row=1)
+        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
+        Label(tk, image=self.img, borderwidth=0,
+              highlightthickness=0).place(x=0, y=0)
 
-        self.username = Entry(tk)
-        self.username.grid(column=1, row=0, pady=2)
-        self.username.focus_set()
+        self.avatar = ImageTk.PhotoImage(file="imgs/avatar.png")
+        Label(tk, image=self.avatar, borderwidth=0,
+              highlightthickness=0).place(x=625, y=50)
 
-        self.password = Entry(tk, show='*')
-        self.password.grid(column=1, row=1, pady=2)
-        self.username.bind('<Return>', lambda: self.password.focus_set())
+        Label(tk, text="LOG IN", bg="white", fg="#39c3e2",
+              font=("helvetica", 20, "bold")).place(x=645, y=200)
 
-        self.button = Button(tk, text=' Log in ',
+        Label(tk, text="USERNAME: ", bg="white", fg="#39c3e2",
+              font=("helvetica", 13, "bold")).place(x=530, y=250)
+        Label(tk, text="PASSWORD: ", bg="white", fg="#39c3e2",
+              font=("helvetica", 13, "bold")).place(x=530, y=290)
+
+        self.username = Entry(tk, highlightthickness=0, relief=FLAT,
+                              fg="#202124", font=("helvetica", 13, "bold"))
+        self.username.place(x=640, y=250)
+        self.username_line = Canvas(
+            tk, width=190, height=2.0, bg="#313131", highlightthickness=0)
+        self.username_line.place(x=640, y=270)
+
+        self.password = Entry(tk, show='*', highlightthickness=0,
+                              relief=FLAT, fg="#202124", font=("helvetica", 13, "bold"))
+        self.password.place(x=640, y=290)
+        self.password_line = Canvas(
+            tk, width=190, height=2.0, bg="#313131", highlightthickness=0)
+        self.password_line.place(x=640, y=310)
+
+        self.login_btn = ImageTk.PhotoImage(file="imgs/LogBtn.png")
+        self.button = Button(tk, image=self.login_btn,
+                             borderwidth=0, highlightthickness=0,
                              command=lambda: (self.loginExe()))
-        self.button.grid(column=0, row=2, columnspan=2, pady=5)
-        self.password.bind('<Return>', lambda: self.button.invoke())
+        self.button.place(x=625, y=345)
+        self.password.bind('<Return>', lambda x: (self.button.invoke()))
 
+        tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
     def signupExe(self):
@@ -146,8 +176,11 @@ class Client:
     def signup_form(self):
         global tk
         tk = Tk()
-        tk.title("Sign Up")
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("SIGNUP")
+        tk.config(bg='white')
         tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
 
         window_height = 500
         window_width = 900
@@ -158,22 +191,44 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
-        Label(tk, text="Username: ").grid(column=0, row=0)
-        Label(tk, text="Password: ").grid(column=0, row=1)
+        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
+        Label(tk, image=self.img, borderwidth=0,
+              highlightthickness=0).place(x=0, y=0)
 
-        self.username = Entry(tk)
-        self.username.grid(column=1, row=0, pady=2)
-        self.username.focus_set()
+        self.avatar = ImageTk.PhotoImage(file="imgs/avatar.png")
+        Label(tk, image=self.avatar, borderwidth=0,
+              highlightthickness=0).place(x=625, y=50)
 
-        self.password = Entry(tk, show='*')
-        self.password.grid(column=1, row=1, pady=2)
-        self.username.bind('<Return>', lambda: self.password.focus_set())
+        Label(tk, text="SIGN UP", bg="white", fg="#39c3e2",
+              font=("helvetica", 20, "bold")).place(x=635, y=200)
 
-        self.button = Button(tk, text='Sign up',
-                             command=lambda: (self.signupExe()))
-        self.button.grid(column=0, row=2, columnspan=2, pady=5)
-        self.password.bind('<Return>', lambda: self.button.invoke())
+        Label(tk, text="USERNAME: ", bg="white", fg="#39c3e2",
+              font=("helvetica", 13, "bold")).place(x=530, y=250)
+        Label(tk, text="PASSWORD: ", bg="white", fg="#39c3e2",
+              font=("helvetica", 13, "bold")).place(x=530, y=290)
 
+        self.username = Entry(tk, highlightthickness=0, relief=FLAT,
+                              fg="#202124", font=("helvetica", 13, "bold"))
+        self.username.place(x=640, y=250)
+        self.username_line = Canvas(
+            tk, width=190, height=2.0, bg="#313131", highlightthickness=0)
+        self.username_line.place(x=640, y=270)
+
+        self.password = Entry(tk, show='*', highlightthickness=0,
+                              relief=FLAT, fg="#202124", font=("helvetica", 13, "bold"))
+        self.password.place(x=640, y=290)
+        self.password_line = Canvas(
+            tk, width=190, height=2.0, bg="#313131", highlightthickness=0)
+        self.password_line.place(x=640, y=310)
+
+        self.login_btn = ImageTk.PhotoImage(file="imgs/SignBtn.png")
+        self.button = Button(tk, image=self.login_btn,
+                             borderwidth=0, highlightthickness=0,
+                             command=lambda: (self.loginExe()))
+        self.button.place(x=625, y=345)
+        self.password.bind('<Return>', lambda x: (self.button.invoke()))
+
+        tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
     def gui_loop(self):
@@ -183,6 +238,7 @@ class Client:
         tk.title("E-note")
         tk.config(bg='lightgray')
         tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
 
         window_height = 620
         window_width = 800
@@ -222,9 +278,10 @@ class Client:
         tk.mainloop()
 
     def stop(self):
+        self.send(str([""]))
         tk.destroy()
         self.sock.close()
-        exit()
+        print(DISCONNECT_MESSAGE)
 
     def receiveGui(self):
         message = self.receive()
