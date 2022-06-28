@@ -224,7 +224,7 @@ class Client:
         self.login_btn = ImageTk.PhotoImage(file="imgs/SignBtn.png")
         self.button = Button(tk, image=self.login_btn,
                              borderwidth=0, highlightthickness=0,
-                             command=lambda: (self.loginExe()))
+                             command=lambda: (self.signupExe()))
         self.button.place(x=625, y=345)
         self.password.bind('<Return>', lambda x: (self.button.invoke()))
 
@@ -273,15 +273,19 @@ class Client:
 
         self.gui_done = True
 
-        tk.protocol("WM_DELETE_WINDOW", self.stop)
+        tk.protocol("WM_DELETE_WINDOW", self.gui_loop_stop)
 
         tk.mainloop()
 
+    def gui_loop_stop(self):
+        self.send(DISCONNECT_MESSAGE)
+        self.sock.close()
+        exit(0)
+
     def stop(self):
         self.send(str([""]))
-        tk.destroy()
         self.sock.close()
-        print(DISCONNECT_MESSAGE)
+        exit(0)
 
     def receiveGui(self):
         message = self.receive()
