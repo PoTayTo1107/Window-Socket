@@ -76,13 +76,7 @@ def loginExe(conn, username, password):
     return "1"
 
 
-def addNote(conn, datatype, username):
-    note = receive(conn, "Enter new note:")
-    writeNote(note, datatype, username)
-    send(conn, "Add new note successfuly")
-
-
-def writeNote(username, msg_list):
+def writeDataFile(username, msg_list):
     with open("userdata/data.json", "r") as file:
         data = json.load(file)
     if username not in data:
@@ -92,8 +86,13 @@ def writeNote(username, msg_list):
         data[f'{username}']['imgs'] = []
         data[f'{username}']['files'] = []
     else:
-        data[f'{username}']['title'].append(msg_list[1])
-        data[f'{username}']['notes'].append(msg_list[2])
+        if msg_list[0] == 'note':
+            data[f'{username}']['title'].append(msg_list[1])
+            data[f'{username}']['notes'].append(msg_list[2])
+        elif msg_list[0] == 'imgs':
+            pass
+        elif msg_list[0] == 'files':
+            pass
     with open("userdata/data.json", "w") as file:
         json.dump(data, file, indent=2)
 
@@ -124,8 +123,7 @@ def handle_client(conn, addr):
                     msg_list = receive(conn)
                     msg_list = eval(msg_list)
                     if msg_list[0] != DISCONNECT_MESSAGE:
-                        if msg_list[0] == "note":
-                            writeNote(list[1], msg_list)
+                        writeDataFile(list[1], msg_list)
                     else:
                         print(f"[DISCONNECTION] {list[1]} disconnected.")
                         conn.close()
