@@ -1,24 +1,12 @@
 {
   "Anhkhoa": {
-    "title": [
-      "Khoa",
-      "Anhkhoa"
+    "title": [],
+    "note": [],
+    "img": [
+      "userdata/files/21127321.jpg"
     ],
-    "notes": [
-      "Khoa",
-      "Anhkhoa"
-    ],
-    "imgs": [],
-    "files": []
-  },
-  "NganLam": {
-    "title": [
-      "Khoa"
-    ],
-    "notes": [
-      "Khoa"
-    ],
-    "imgs": [],
-    "files": []
+    "file": [
+      "userdata/files/248439031_1027739211133556_7250487426110356478_n.jpg"
+    ]
   }
 }
