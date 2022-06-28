@@ -3,6 +3,7 @@ import time
 import os
 import json
 import threading
+import shutil
 
 PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
@@ -81,26 +82,25 @@ def addNote(conn, datatype, username):
     send(conn, "Add new note successfuly")
 
 
-def writeNote(content, datatype, username):
-    with open("data.json", "r") as file:
+def writeNote(username, msg_list):
+    with open("userdata/data.json", "r") as file:
         data = json.load(file)
-    for i in data:
-        if str(i) == username:
-            data[f'{username}'][f'{datatype}'].append(content)
-            with open("data.json", "w") as file:
-                json.dump(data, file, indent=2)
-            return
-    data[f'{username}'] = {}
-    data[f'{username}']['notes'] = []
-    data[f'{username}']['imgs'] = []
-    data[f'{username}']['files'] = []
-    data[f'{username}'][f'{datatype}'].append(content)
-    with open("data.json", "w") as file:
+    if username not in data:
+        data[f'{username}'] = {}
+        data[f'{username}']['title'] = []
+        data[f'{username}']['notes'] = []
+        data[f'{username}']['imgs'] = []
+        data[f'{username}']['files'] = []
+    else:
+        data[f'{username}']['title'].append(msg_list[1])
+        data[f'{username}']['notes'].append(msg_list[2])
+    with open("userdata/data.json", "w") as file:
         json.dump(data, file, indent=2)
 
 
 def showNote(conn, username):
-    data = openFile("data")
+    with open("userdata/data.json", "r") as file:
+        data = json.load(file)
     if username in data:
         if len(data[f'{username}']['notes']) == 0:
             send(conn, "EMPTY")
@@ -121,11 +121,15 @@ def handle_client(conn, addr):
             if out == "0":
                 print(f"[NEW CONNECTION] {list[1]} connected.")
                 while True:
-                    msg = receive(conn)
-                    if msg != DISCONNECT_MESSAGE:
-                        send(conn, msg)
+                    msg_list = receive(conn)
+                    msg_list = eval(msg_list)
+                    if msg_list[0] != DISCONNECT_MESSAGE:
+                        if msg_list[0] == "note":
+                            writeNote(list[1], msg_list)
                     else:
                         print(f"[DISCONNECTION] {list[1]} disconnected.")
+                        conn.close()
+                        return
         else:
             conn.close()
             break
