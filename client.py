@@ -52,7 +52,7 @@ class Client:
         self.label = Label(tk, image=self.img, borderwidth=0,
                            highlightthickness=0).place(x=0, y=0)
 
-        Label(tk, text="E-Note", bg="white",
+        Label(tk, text="E-Note", bg="white", fg="#39c3e2",
               font=("Times New Roman", 60, "bold")).place(x=585, y=120)
 
         self.login_btn = ImageTk.PhotoImage(file="imgs/LogBtn.png")
@@ -86,7 +86,7 @@ class Client:
             self.gui_loop(),
         else:
             tkinter.messagebox.showerror(
-                "Notification", "Invalid username or password")
+                "Error", "Invalid username or password")
 
     def login_form(self):
         global tk
@@ -159,19 +159,19 @@ class Client:
             self.login_signup_picker()
         elif out == "1":
             tkinter.messagebox.showerror(
-                "Notification", "Username is too short")
+                "ERROR", "Username is too short")
         elif out == "2":
             tkinter.messagebox.showerror(
-                "Notification", "Password is too short")
+                "ERROR", "Password is too short")
         elif out == "3":
             tkinter.messagebox.showerror(
-                "Notification", "Username contains invalid character(s)")
+                "ERROR", "Username contains invalid character(s)")
         elif out == "4":
             tkinter.messagebox.showerror(
-                "Notification", "Username is already taken")
+                "ERROR", "Username is already taken")
         else:
             tkinter.messagebox.showerror(
-                "Notification", "ERROR!")
+                "ERROR", "ERROR!")
 
     def signup_form(self):
         global tk
