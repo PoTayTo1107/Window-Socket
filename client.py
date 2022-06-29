@@ -438,7 +438,7 @@ def sendFile_Client(client):
         print("ERROR")
         
         
-def recvFile_client(client):
+def recvFile_Client(client):
     try:
         file_need=input("File name: ")
         client.sendall(file_need.encode(FORMAT))
