@@ -146,6 +146,29 @@ def RecvFile(conn):
         print("ERROR")
         
 
+def sendFile_server(conn):
+    try:
+        file_name=conn.recv(1024).decode(FORMAT)
+        file_path="C:/Users/Boonrealcua/Desktop/Test/"
+        file_path+=file_name
+        print(file_path)
+        file_exists = os.path.exists(file_path)
+        check=None
+        if(file_exists==True):
+            check="YES"
+        else:
+            check="NO"
+        conn.sendall(check.encode(FORMAT))
+        if(file_exists==True):
+            file = open(file_path, 'rb')
+            data = file.read(2048)
+            while data:
+                conn.send(data)
+                data = file.read(2048)
+            file.close()
+            print("Success")
+    except:
+        print("ERROR")
 
               
 def start():
