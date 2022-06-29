@@ -129,7 +129,7 @@ def handle_client(conn, addr):
             break
 
             
-def RecvFile(conn):
+def RecvFile_Server(conn):
     try:
         file_name=conn.recv(1024).decode(FORMAT)
         file_path="C:/Users/Boonrealcua/Desktop/Test/"#Server save location
@@ -146,7 +146,7 @@ def RecvFile(conn):
         print("ERROR")
         
 
-def sendFile_server(conn):
+def sendFile_Server(conn):
     try:
         file_name=conn.recv(1024).decode(FORMAT)
         file_path="C:/Users/Boonrealcua/Desktop/Test/"#Server save location
