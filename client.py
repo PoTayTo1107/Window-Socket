@@ -436,4 +436,28 @@ def sendFile_Client(client):
         print("Success")
     except:
         print("ERROR")
+        
+        
+def recvFile_client(client):
+    try:
+        file_need=input("File name: ")
+        client.sendall(file_need.encode(FORMAT))
+        msgR=client.recv(1024).decode(FORMAT)
+        if(msgR=="YES"):
+            save_path=input("Save location: ")
+            save_path+=file_need
+            myfile=Path(save_path)
+            myfile.touch(exist_ok=True)
+            file = open(myfile, "wb")
+            image_chunk = client.recv(2048)  # stream-based protocol
+            while image_chunk:
+                file.write(image_chunk)
+                image_chunk = client.recv(2048)
+            print("Success")
+        else:
+            print("Dont have that file in server")
+    except:
+        print("ERROR")
+
+
 client = Client()
