@@ -132,7 +132,7 @@ def handle_client(conn, addr):
 def RecvFile(conn):
     try:
         file_name=conn.recv(1024).decode(FORMAT)
-        file_path="C:/Users/Boonrealcua/Desktop/Test/"
+        file_path="C:/Users/Boonrealcua/Desktop/Test/"#Server save location
         file_path+=file_name
         myfile = Path(file_path)
         myfile.touch(exist_ok=True)
@@ -149,7 +149,7 @@ def RecvFile(conn):
 def sendFile_server(conn):
     try:
         file_name=conn.recv(1024).decode(FORMAT)
-        file_path="C:/Users/Boonrealcua/Desktop/Test/"
+        file_path="C:/Users/Boonrealcua/Desktop/Test/"#Server save location
         file_path+=file_name
         print(file_path)
         file_exists = os.path.exists(file_path)
