@@ -421,5 +421,19 @@ class Client:
     def receive(self):
         return self.sock.recv(2048).decode(FORMAT)
 
-
+def sendFile_Client(client):
+    try:
+        file_path=input("File path: ")
+        head_tail=os.path.split(file_path)
+        file_name=head_tail[1]
+        client.sendall(file_name.encode(FORMAT))
+        file = open(file_path, 'rb')
+        data = file.read(2048)
+        while data:
+            client.send(data)
+            data = file.read(2048)
+        file.close()
+        print("Success")
+    except:
+        print("ERROR")
 client = Client()
