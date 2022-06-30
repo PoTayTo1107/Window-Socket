@@ -1,17 +1,20 @@
+import io
 import socket
 import gc
 import time
 import os
-import shutil
 import threading
+import base64
 import tkinter as tk
 import tkinter.scrolledtext
 import tkinter.messagebox
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 import PIL
+import PIL.Image
 from PIL import ImageTk, Image
 from pathlib import Path
+from tkinter import ttk
 
 PORT = 5050
 SERVER = "26.183.40.49"
@@ -30,6 +33,7 @@ class Client:
         self.login_thread = threading.Thread(target=self.login_signup_picker)
         self.login_thread.start()
 
+    # LOGIN SIGNUP
     def login_signup_picker(self):
         global tk
         tk = Tk()
@@ -83,7 +87,10 @@ class Client:
                 "Notification", "Log in successfully")
             tk.destroy()
             self.nickname = username
-            self.functionGui(),
+            self.notes = self.receive()
+            self.notes = eval(self.notes)
+            self.mainGui()
+            print(1)
         else:
             tkinter.messagebox.showerror(
                 "Error", "Invalid username or password")
@@ -229,52 +236,7 @@ class Client:
         tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
-    def functionGui(self):
-        global tk
-        tk = Tk()
-        tk.iconbitmap('imgs/notes.ico')
-        tk.title("FUNCTIONS")
-        tk.config(bg='white')
-        tk.resizable(False, False)
-        tk.after(1, lambda: tk.focus_force())
-
-        window_height = 500
-        window_width = 900
-        screen_width = tk.winfo_screenwidth()
-        screen_height = tk.winfo_screenheight()
-        x_cordinate = int((screen_width/2) - (window_width/2))
-        y_cordinate = int((screen_height/2) - (window_height/2))
-        tk.geometry("{}x{}+{}+{}".format(window_width,
-                    window_height, x_cordinate, y_cordinate))
-
-        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
-        Label(tk, image=self.img, borderwidth=0,
-              highlightthickness=0).place(x=0, y=0)
-
-        Label(tk, text="FUNCTIONS", bg="white", fg="#39c3e2",
-              font=("helvetica", 40, "bold")).place(x=550, y=100)
-
-        self.add_img = ImageTk.PhotoImage(file="imgs/Add.png")
-        self.add_img_btn = Button(tk, image=self.add_img,
-                                  borderwidth=0, highlightthickness=0,
-                                  command=lambda: (tk.destroy(), self.addGui()))
-        self.add_img_btn.place(x=625, y=200)
-
-        self.show_img = ImageTk.PhotoImage(file="imgs/Show.png")
-        self.show_img_btn = Button(tk, image=self.show_img,
-                                   borderwidth=0, highlightthickness=0,
-                                   command=lambda: (self.addImgExe()))
-        self.show_img_btn.place(x=625, y=260)
-
-        self.delete_img = ImageTk.PhotoImage(file="imgs/Delete.png")
-        self.delete_img_btn = Button(tk, image=self.delete_img,
-                                     borderwidth=0, highlightthickness=0,
-                                     command=lambda: (self.addFileExe()))
-        self.delete_img_btn.place(x=625, y=320)
-
-        tk.protocol("WM_DELETE_WINDOW", self.disStop)
-        tk.mainloop()
-
+    # ADD
     def addNoteExe(self):
         title = self.input_title.get('1.0', 'end')
         message = self.input_area.get('1.0', 'end')
@@ -284,10 +246,12 @@ class Client:
             tk.destroy()
             title = title[:-1]
             message = message[:-1]
-            self.send(str(["note", title, message]))
+            self.send(str(["Add", "Txt", title, message]))
             tkinter.messagebox.showinfo(
                 "Notification", "Add text successfully")
-            self.functionGui()
+            self.notes = self.receive()
+            self.notes = eval(self.notes)
+            self.mainGui()
         else:
             tkinter.messagebox.showerror(
                 "ERROR", "Cannot leave title or message empty!")
@@ -321,7 +285,7 @@ class Client:
         self.send_note_button.config(font=("Arial", 12))
         self.send_note_button.pack(side=RIGHT, padx=20, pady=5)
 
-        tk.protocol("WM_DELETE_WINDOW", self.disStop)
+        tk.protocol("WM_DELETE_WINDOW", self.stop)
 
         tk.mainloop()
 
@@ -331,28 +295,40 @@ class Client:
                                               ("image", ".png"),
                                               ("image", ".jpg")])
         try:
-            img = open(f'{img_path}', 'rb')
+            img = open(img_path, 'rb')
             while img_path.find('/') > 0:
                 img_path = img_path[img_path.find('/')+1:]
-            self.send(str(["img", img_path]))
+            self.send(str(["Add", "Image", img_path]))
             img_data = img.read()
             self.sock.send(img_data)
             img.close()
             tkinter.messagebox.showinfo(
                 "Notification", "Add image successfully")
+            tk.destroy()
+            self.notes = self.receive()
+            self.notes = eval(self.notes)
+            self.mainGui()
         except:
             tkinter.messagebox.showerror(
                 "ERROR", "Error while adding image")
 
     def addFileExe(self):
+
         file_path = askopenfilename(title='Select File')
         try:
-            shutil.copy(file_path, "userdata/files/")
+            file = open(f'{file_path}', 'rb')
             while file_path.find('/') > 0:
                 file_path = file_path[file_path.find('/')+1:]
-            self.send(str(2))
+            self.send(str(["Add", "File", file_path]))
+            file_data = file.read()
+            self.sock.send(file_data)
+            file.close()
             tkinter.messagebox.showinfo(
                 "Notification", "Add file successfully")
+            tk.destroy()
+            self.notes = self.receive()
+            self.notes = eval(self.notes)
+            self.mainGui()
         except:
             tkinter.messagebox.showerror(
                 "ERROR", "Error while adding file")
@@ -361,7 +337,7 @@ class Client:
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
-        tk.title("Function")
+        tk.title("ADD")
         tk.config(bg='white')
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
@@ -400,67 +376,140 @@ class Client:
                                   command=lambda: (self.addFileExe()))
         self.addfile_btn.place(x=625, y=320)
 
-        tk.protocol("WM_DELETE_WINDOW", self.disStop)
+        tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
-    # def showNoteExe(self):
-    #     tk.destroy()
-    #     self.text_area.config(state='normal')
-    #    # self.text_area.insert('end', f"Title:\n{title}\nNote:\n{message}")
-    #     self.text_area.yview('end')
-    #     self.text_area.config(state='disabled')
+    # SHOW
+    def showNoteExe(self, title, msg):
+        global tk
+        tk = Tk()
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("ADD NOTE")
+        tk.config(bg='lightgray')
+        tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
 
-    # def showNoteGui(self):
-    #     global tk
-    #     tk = Tk()
-    #     tk.iconbitmap('imgs/notes.ico')
-    #     tk.title("E-note")
-    #     tk.config(bg='white')
-    #     tk.resizable(False, False)
-    #     tk.after(1, lambda: tk.focus_force())
+        window_height = 300
+        window_width = 400
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2)) - 20
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
 
-    #     window_height = 700
-    #     window_width = 800
-    #     screen_width = tk.winfo_screenwidth()
-    #     screen_height = tk.winfo_screenheight()
-    #     x_cordinate = int((screen_width/2) - (window_width/2))
-    #     y_cordinate = int((screen_height/2) - (window_height/2)) - 20
-    #     tk.geometry("{}x{}+{}+{}".format(window_width,
-    #                 window_height, x_cordinate, y_cordinate))
+        self.input_title = Label(tk, text=title, height=1)
+        self.input_title.pack(padx=20, pady=3)
 
-    #     self.chat_label = Label(tk, text='Chat: ', bg="lightgray")
-    #     self.chat_label.config(state='disabled')
-    #     self.chat_label.pack(padx=20, pady=5)
+        self.input_area = Label(tk, text=msg, height=4)
+        self.input_area.pack(padx=20, pady=5)
 
-    #     self.text_area = Listbox(tk)
-    #     self.text_area.config(font=("Arial", 12))
-    #     self.text_area.pack(padx=20, pady=5)
+        self.send_note_button = Button(
+            tk, text='Close', command=lambda: (tk.destroy(), self.mainGui()))
+        self.send_note_button.config(font=("Arial", 12))
+        self.send_note_button.pack(side=RIGHT, padx=20, pady=5)
 
-    #     self.msg_label = Label(tk, text='Message: ', bg="lightgray")
-    #     self.msg_label.config(state='disabled')
-    #     self.msg_label.pack(padx=20, pady=5)
+        tk.protocol("WM_DELETE_WINDOW", self.stop)
 
-    #     self.send_img_button = Button(
-    #         tk, text='Delete note', command=lambda: self.receiveNoteGui())
-    #     self.send_img_button.config(font=("Arial", 12))
-    #     self.send_img_button.pack(side=RIGHT, padx=20, pady=5)
+        tk.mainloop()
 
-    #     self.send_file_button = Button(
-    #         tk, text='Show all notes', command=lambda: self.receiveNoteGui())
-    #     self.send_file_button.config(font=("Arial", 12))
-    #     self.send_file_button.pack(side=RIGHT, padx=20, pady=5)
+    def showExe(self):
+        selected_item = self.listNotes.focus()
+        path = self.listNotes.item(selected_item, "values")
+        if path[1] == "Txt":
+            tk.destroy()
+            self.showNoteExe(path[2], path[3])
+        else:
+            self.send(str(["Show", path[3]]))
+            file = self.sock.recv(4096000)
+            image = Image.open(io.BytesIO(base64.b64decode(file)))
+            image.show()
 
-    #     tk.protocol("WM_DELETE_WINDOW", self.disStop)
+    # MAIN GUI
 
-    #     tk.mainloop()
+    def mainGui(self):
+        global tk
+        tk = Tk()
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("E-note")
+        tk.config(bg='white')
+        tk.after(1, lambda: tk.focus_force())
+        tk.resizable(False, False)
 
-    def disStop(self):
-        self.send(str([DISCONNECT_MESSAGE]))
-        self.sock.close()
-        exit(0)
+        window_height = 500
+        window_width = 600
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
+
+        # List Notes
+        self.noteContainer = Frame(bg='#f2f2f2')
+        self.noteContainer.place(x=40, y=30)
+
+        # Treeview Scrollbar
+        scrollBar = Scrollbar(self.noteContainer)
+        scrollBar.pack(side=RIGHT, fill=Y)
+
+        self.listNotes = ttk.Treeview(
+            self.noteContainer, height=20, yscrollcommand=scrollBar.set)
+        self.listNotes.pack()
+
+        # Treeview Style
+        style = ttk.Style()
+        style.configure("Treeview.Heading", font=("helvetica", 13, "bold"))
+        style.configure("Treeview", font=(
+            "helvetica", 13), foreground='#202124')
+
+        # Configure The Scrollbar
+        scrollBar.config(command=self.listNotes.yview)
+
+        # List Notes Columns
+        self.listNotes['columns'] = ("ID", "Type", "Title")
+        self.listNotes.column("#0", width=0, stretch="NO")
+        self.listNotes.column("ID", anchor="center", width=50)
+        self.listNotes.column("Type", anchor="center", width=80)
+        self.listNotes.column("Title", anchor="center", width=200)
+
+        self.listNotes.heading("#0", text="", anchor="center")
+        self.listNotes.heading("ID", text="ID", anchor="center")
+        self.listNotes.heading("Type", text="Type", anchor="center")
+        self.listNotes.heading("Title", text="Title", anchor="center")
+
+        # Insert Data To Treeview
+        count = 0
+
+        for note in self.notes[self.nickname]:
+            self.listNotes.insert(parent='', index='end', iid=count, text="",
+                                  values=(count+1, note["type"], note["title"], note["content"]))
+            count += 1
+
+        add = ImageTk.PhotoImage(file="imgs/Add.png")
+        add_btn = Button(tk, image=add,
+                         borderwidth=0, highlightthickness=0,
+                         command=lambda: (tk.destroy(), self.addGui()))
+        add_btn.place(x=420, y=200)
+
+        show = ImageTk.PhotoImage(file="imgs/Show.png")
+        show_btn = Button(tk, image=show,
+                          borderwidth=0, highlightthickness=0,
+                          command=lambda: (self.showExe()))
+        show_btn.place(x=420, y=250)
+
+        delete = ImageTk.PhotoImage(file="imgs/Delete.png")
+        delete_btn = Button(tk, image=delete,
+                            borderwidth=0, highlightthickness=0,
+                            command=lambda: (tk.destroy(), self.deleteGui()))
+        delete_btn.place(x=420, y=300)
+
+        tk.protocol("WM_DELETE_WINDOW", self.stop)
+
+        tk.mainloop()
 
     def stop(self):
-        self.send(str([""]))
+        self.send(str([DISCONNECT_MESSAGE]))
         self.sock.close()
         exit(0)
 
@@ -469,44 +518,6 @@ class Client:
 
     def receive(self):
         return self.sock.recv(2048).decode(FORMAT)
-
-def sendFile_Client(client):
-    try:
-        file_path=input("File path: ")
-        head_tail=os.path.split(file_path)
-        file_name=head_tail[1]
-        client.sendall(file_name.encode(FORMAT))
-        file = open(file_path, 'rb')
-        data = file.read(2048)
-        while data:
-            client.send(data)
-            data = file.read(2048)
-        file.close()
-        print("Success")
-    except:
-        print("ERROR")
-        
-        
-def recvFile_Client(client):
-    try:
-        file_need=input("File name: ")
-        client.sendall(file_need.encode(FORMAT))
-        msgR=client.recv(1024).decode(FORMAT)
-        if(msgR=="YES"):
-            save_path=input("Save location: ")
-            save_path+=file_need
-            myfile=Path(save_path)
-            myfile.touch(exist_ok=True)
-            file = open(myfile, "wb")
-            image_chunk = client.recv(2048)  # stream-based protocol
-            while image_chunk:
-                file.write(image_chunk)
-                image_chunk = client.recv(2048)
-            print("Success")
-        else:
-            print("Dont have that file in server")
-    except:
-        print("ERROR")
 
 
 client = Client()

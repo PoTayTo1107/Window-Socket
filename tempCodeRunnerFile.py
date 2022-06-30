@@ -1,2 +1,1 @@
-
-        image_chunk = conn.recv(
+sendData(conn)
