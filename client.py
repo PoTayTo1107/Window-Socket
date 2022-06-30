@@ -254,23 +254,23 @@ class Client:
         Label(tk, text="FUNCTIONS", bg="white", fg="#39c3e2",
               font=("helvetica", 40, "bold")).place(x=550, y=100)
 
-        self.addnote_btn_img = ImageTk.PhotoImage(file="imgs/Addnote.png")
-        self.addnote_btn = Button(tk, image=self.addnote_btn_img,
+        self.add_img = ImageTk.PhotoImage(file="imgs/Add.png")
+        self.add_img_btn = Button(tk, image=self.add_img,
                                   borderwidth=0, highlightthickness=0,
-                                  command=lambda: (tk.destroy(), self.addNoteGui()))
-        self.addnote_btn.place(x=625, y=200)
+                                  command=lambda: (tk.destroy(), self.addGui()))
+        self.add_img_btn.place(x=625, y=200)
 
-        self.addimg_btn_img = ImageTk.PhotoImage(file="imgs/Addimg.png")
-        self.addimg_btn = Button(tk, image=self.addimg_btn_img,
-                                 borderwidth=0, highlightthickness=0,
-                                 command=lambda: (self.addImgExe()))
-        self.addimg_btn.place(x=625, y=260)
+        self.show_img = ImageTk.PhotoImage(file="imgs/Show.png")
+        self.show_img_btn = Button(tk, image=self.show_img,
+                                   borderwidth=0, highlightthickness=0,
+                                   command=lambda: (self.addImgExe()))
+        self.show_img_btn.place(x=625, y=260)
 
-        self.addfile_btn_img = ImageTk.PhotoImage(file="imgs/Addfile.png")
-        self.addfile_btn = Button(tk, image=self.addfile_btn_img,
-                                  borderwidth=0, highlightthickness=0,
-                                  command=lambda: (self.addFileExe()))
-        self.addfile_btn.place(x=625, y=320)
+        self.delete_img = ImageTk.PhotoImage(file="imgs/Delete.png")
+        self.delete_img_btn = Button(tk, image=self.delete_img,
+                                     borderwidth=0, highlightthickness=0,
+                                     command=lambda: (self.addFileExe()))
+        self.delete_img_btn.place(x=625, y=320)
 
         tk.protocol("WM_DELETE_WINDOW", self.disStop)
         tk.mainloop()
@@ -331,10 +331,13 @@ class Client:
                                               ("image", ".png"),
                                               ("image", ".jpg")])
         try:
-            shutil.copy(img_path, "userdata/imgs/")
+            img = open(f'{img_path}', 'rb')
             while img_path.find('/') > 0:
                 img_path = img_path[img_path.find('/')+1:]
-            self.send(str(["img", f"userdata/files/{img_path}"]))
+            self.send(str(["img", img_path]))
+            img_data = img.read()
+            self.sock.send(img_data)
+            img.close()
             tkinter.messagebox.showinfo(
                 "Notification", "Add image successfully")
         except:
@@ -347,12 +350,58 @@ class Client:
             shutil.copy(file_path, "userdata/files/")
             while file_path.find('/') > 0:
                 file_path = file_path[file_path.find('/')+1:]
-            self.send(str(["file", f"userdata/files/{file_path}"]))
+            self.send(str(2))
             tkinter.messagebox.showinfo(
                 "Notification", "Add file successfully")
         except:
             tkinter.messagebox.showerror(
                 "ERROR", "Error while adding file")
+
+    def addGui(self):
+        global tk
+        tk = Tk()
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("Function")
+        tk.config(bg='white')
+        tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
+
+        window_height = 500
+        window_width = 900
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
+
+        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
+        Label(tk, image=self.img, borderwidth=0,
+              highlightthickness=0).place(x=0, y=0)
+
+        Label(tk, text="FUNCTIONS", bg="white", fg="#39c3e2",
+              font=("helvetica", 40, "bold")).place(x=550, y=100)
+
+        self.addnote_btn_img = ImageTk.PhotoImage(file="imgs/Addnote.png")
+        self.addnote_btn = Button(tk, image=self.addnote_btn_img,
+                                  borderwidth=0, highlightthickness=0,
+                                  command=lambda: (tk.destroy(), self.addNoteGui()))
+        self.addnote_btn.place(x=625, y=200)
+
+        self.addimg_btn_img = ImageTk.PhotoImage(file="imgs/Addimg.png")
+        self.addimg_btn = Button(tk, image=self.addimg_btn_img,
+                                 borderwidth=0, highlightthickness=0,
+                                 command=lambda: (self.addImgExe()))
+        self.addimg_btn.place(x=625, y=260)
+
+        self.addfile_btn_img = ImageTk.PhotoImage(file="imgs/Addfile.png")
+        self.addfile_btn = Button(tk, image=self.addfile_btn_img,
+                                  borderwidth=0, highlightthickness=0,
+                                  command=lambda: (self.addFileExe()))
+        self.addfile_btn.place(x=625, y=320)
+
+        tk.protocol("WM_DELETE_WINDOW", self.disStop)
+        tk.mainloop()
 
     # def showNoteExe(self):
     #     tk.destroy()
