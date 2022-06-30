@@ -72,36 +72,49 @@ def loginExe(conn, username, password):
     return "1"
 
 
-def writeDataFile(username, msg_list):
+def writeDataFile(conn, username, msg_list):
     with open("userdata/data.json", "r") as file:
         data = json.load(file)
     if username not in data:
-        data[f'{username}'] = {}
-        data[f'{username}']['title'] = []
-        data[f'{username}']['note'] = []
-        data[f'{username}']['img'] = []
-        data[f'{username}']['file'] = []
+        data[username] = {}
+        data[username]['title'] = []
+        data[username]['note'] = []
+        data[username]['img'] = []
+        data[username]['file'] = []
 
     if msg_list[0] == 'note':
-        data[f'{username}']['title'].append(msg_list[1])
-        data[f'{username}']['note'].append(msg_list[2])
+        data[username]['title'].append(msg_list[1])
+        data[username]['note'].append(msg_list[2])
     elif msg_list[0] == 'img':
-        data[f'{username}']['img'].append(msg_list[1])
+        path = f'userdata/imgs/{msg_list[1]}'
+        file = open(path, "wb")
+        image_chunk = conn.recv(4096000)
+        file.write(image_chunk)
+        data[username]['img'].append(path)
+        file.close()
     elif msg_list[0] == 'file':
-        data[f'{username}']['file'].append(msg_list[1])
+        data[username]['file'].append(msg_list[1])
     with open("userdata/data.json", "w") as file:
         json.dump(data, file, indent=2)
 
 
-# def showNote(conn, username):
-#     with open("userdata/data.json", "r") as file:
-#         data = json.load(file)
-#     if username in data:
-#         if len(data[f'{username}']['notes']) == 0:
-#             send(conn, "EMPTY")
-#         else:
-#             for i in data[f'{username}']['notes']:
-#                 send(conn, i + '\n')
+def showData(conn, username, msg_list):
+    with open("userdata/data.json", "r") as file:
+        data = json.load(file)
+    if username in data:
+        if len(data[username][msg_list[1]]) == 0:
+            send(conn, "!ERROR")
+        elif data[username][msg_list[1]] == 'note':
+            send(conn, str(data[username]['title']))
+            send(conn, str(data[username]['note']))
+        elif data[username][msg_list[1]] == 'img':
+            send(conn, str(data[username]['img']))
+        elif data[username][msg_list[1]] == 'file':
+            send(conn, str(data[username]['file']))
+
+
+def deleteData(username, msg_list):
+    pass
 
 
 def handle_client(conn, addr):
@@ -118,12 +131,17 @@ def handle_client(conn, addr):
                 while True:
                     msg_list = receive(conn)
                     msg_list = eval(msg_list)
-                    if msg_list[0] != DISCONNECT_MESSAGE:
-                        writeDataFile(list[1], msg_list)
-                    else:
+                    if msg_list[0] == DISCONNECT_MESSAGE:
                         print(f"[DISCONNECTION] {list[1]} disconnected.")
                         conn.close()
                         return
+                    elif msg_list[0] == "Show":
+                        showData(conn, list[1], msg_list)
+                    elif msg_list[0] == "Delete":
+                        deleteData(list[1], msg_list)
+                    else:
+                        writeDataFile(conn, list[1], msg_list)
+
         else:
             conn.close()
             break
