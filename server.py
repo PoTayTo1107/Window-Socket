@@ -1,9 +1,10 @@
+import io
 import socket
 import time
 import os
 import json
 import threading
-import shutil
+import base64
 
 PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
@@ -64,57 +65,74 @@ def signupExe(conn, username, password):
         writeFile(username, password)
 
 
-def loginExe(conn, username, password):
-    data = openFile("users")
-    for i in data:
+def loginExe(username, password):
+    login = openFile("users")
+    for i in login:
         if i['username'] == username and i['password'] == password:
             return "0"
     return "1"
 
 
+def addUser(username):
+    with open("userdata/data.json", "r") as file:
+        userdata = json.load(file)
+    if username not in userdata:
+        userdata[username] = []
+    with open("userdata/data.json", "w") as file:
+        json.dump(userdata, file, indent=2)
+
+
 def writeDataFile(conn, username, msg_list):
     with open("userdata/data.json", "r") as file:
         data = json.load(file)
-    if username not in data:
-        data[username] = {}
-        data[username]['title'] = []
-        data[username]['note'] = []
-        data[username]['img'] = []
-        data[username]['file'] = []
-
-    if msg_list[0] == 'note':
-        data[username]['title'].append(msg_list[1])
-        data[username]['note'].append(msg_list[2])
-    elif msg_list[0] == 'img':
-        path = f'userdata/imgs/{msg_list[1]}'
-        file = open(path, "wb")
+    if msg_list[1] == 'Txt':
+        dataToAdd = {
+            "type": msg_list[1],
+            "title": msg_list[2],
+            "content": msg_list[3]
+        }
+    elif msg_list[1] == 'Image':
+        image_path = f'userdata/{username}/imgs'
+        try:
+            os.makedirs(image_path)
+        except FileExistsError:
+            pass
+        content = f'{image_path}/{msg_list[2]}'
+        dataToAdd = {
+            "type": msg_list[1],
+            "title": msg_list[2],
+            "content": content
+        }
+        image = open(content, "wb")
         image_chunk = conn.recv(4096000)
-        file.write(image_chunk)
-        data[username]['img'].append(path)
+        image.write(image_chunk)
+        image.close()
+    elif msg_list[1] == 'File':
+        file_path = f'userdata/{username}/files'
+        try:
+            os.makedirs(file_path)
+        except FileExistsError:
+            pass
+        content = f'{file_path}/{msg_list[2]}'
+        dataToAdd = {
+            "type": msg_list[1],
+            "title": msg_list[2],
+            "content": content
+        }
+        file = open(content, "wb")
+        file_chunk = conn.recv(4096000)
+        file.write(file_chunk)
         file.close()
-    elif msg_list[0] == 'file':
-        data[username]['file'].append(msg_list[1])
+    data[username].append(dataToAdd)
     with open("userdata/data.json", "w") as file:
         json.dump(data, file, indent=2)
 
 
-def showData(conn, username, msg_list):
+def sendData(conn):
     with open("userdata/data.json", "r") as file:
         data = json.load(file)
-    if username in data:
-        if len(data[username][msg_list[1]]) == 0:
-            send(conn, "!ERROR")
-        elif data[username][msg_list[1]] == 'note':
-            send(conn, str(data[username]['title']))
-            send(conn, str(data[username]['note']))
-        elif data[username][msg_list[1]] == 'img':
-            send(conn, str(data[username]['img']))
-        elif data[username][msg_list[1]] == 'file':
-            send(conn, str(data[username]['file']))
-
-
-def deleteData(username, msg_list):
-    pass
+        if data != {}:
+            send(conn, str(data))
 
 
 def handle_client(conn, addr):
@@ -124,10 +142,12 @@ def handle_client(conn, addr):
         if list[0] == "Sign up":
             signupExe(conn, list[1], list[2])
         elif list[0] == "Log in":
-            out = loginExe(conn, list[1], list[2])
+            out = loginExe(list[1], list[2])
             send(conn, out)
             if out == "0":
                 print(f"[NEW CONNECTION] {list[1]} connected.")
+                addUser(list[1])
+                sendData(conn)
                 while True:
                     msg_list = receive(conn)
                     msg_list = eval(msg_list)
@@ -135,60 +155,19 @@ def handle_client(conn, addr):
                         print(f"[DISCONNECTION] {list[1]} disconnected.")
                         conn.close()
                         return
-                    elif msg_list[0] == "Show":
-                        showData(conn, list[1], msg_list)
-                    elif msg_list[0] == "Delete":
-                        deleteData(list[1], msg_list)
-                    else:
+                    elif msg_list[0] == "Add":
                         writeDataFile(conn, list[1], msg_list)
+                        sendData(conn)
+                    elif msg_list[0] == "Show":
+                        img = open(msg_list[1], "rb")
+                        data = base64.b64encode(img.read())
+                        conn.send(data)
 
         else:
             conn.close()
             break
 
-            
-def RecvFile_Server(conn):
-    try:
-        file_name=conn.recv(1024).decode(FORMAT)
-        file_path="C:/Users/Boonrealcua/Desktop/Test/"#Server save location
-        file_path+=file_name
-        myfile = Path(file_path)
-        myfile.touch(exist_ok=True)
-        file = open(myfile, "wb")
-        image_chunk = conn.recv(2048)  # stream-based protocol
-        while image_chunk:
-            file.write(image_chunk)
-            image_chunk = conn.recv(2048)
-        print("Success")
-    except:
-        print("ERROR")
-        
 
-def sendFile_Server(conn):
-    try:
-        file_name=conn.recv(1024).decode(FORMAT)
-        file_path="C:/Users/Boonrealcua/Desktop/Test/"#Server save location
-        file_path+=file_name
-        print(file_path)
-        file_exists = os.path.exists(file_path)
-        check=None
-        if(file_exists==True):
-            check="YES"
-        else:
-            check="NO"
-        conn.sendall(check.encode(FORMAT))
-        if(file_exists==True):
-            file = open(file_path, 'rb')
-            data = file.read(2048)
-            while data:
-                conn.send(data)
-                data = file.read(2048)
-            file.close()
-            print("Success")
-    except:
-        print("ERROR")
-
-              
 def start():
     os.system('cls')
     server.listen()
