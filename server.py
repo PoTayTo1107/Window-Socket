@@ -1,6 +1,4 @@
-import io
 import socket
-import time
 import os
 import json
 import threading
@@ -12,25 +10,26 @@ ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 
+# IPv4 & TCP
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
-
+# Send
 def send(conn, msg):
     conn.send(msg.encode(FORMAT))
 
-
+# Receive
 def receive(conn):
     return conn.recv(2048).decode(FORMAT)
 
-
+# Open input string file
 def openFile(str):
     with open(f"{str}.json") as file:
         data = json.load(file)
     file.close()
     return data
 
-
+# Write user data to users.json
 def writeFile(username, password):
     user = {
         "username": username,
@@ -42,7 +41,7 @@ def writeFile(username, password):
     with open("users.json", "w") as file:
         json.dump(data, file, indent=2)
 
-
+# Check if sign up data valid or not
 def signupChecker(username, password):
     if (len(username) < 5):
         return "1"
@@ -57,14 +56,14 @@ def signupChecker(username, password):
             return "4"
     return "0"
 
-
+# Sign up
 def signupExe(conn, username, password):
     out = signupChecker(username, password)
     send(conn, out)
     if out == "0":
         writeFile(username, password)
 
-
+# Log in
 def loginExe(username, password):
     login = openFile("users")
     for i in login:
@@ -72,7 +71,7 @@ def loginExe(username, password):
             return "0"
     return "1"
 
-
+# Add username to userdata if user didn't exist
 def addUser(username):
     with open("userdata/data.json", "r") as file:
         userdata = json.load(file)
@@ -81,7 +80,7 @@ def addUser(username):
     with open("userdata/data.json", "w") as file:
         json.dump(userdata, file, indent=2)
 
-
+# Write user data to data.json
 def writeDataFile(conn, username, msg_list):
     with open("userdata/data.json", "r") as file:
         data = json.load(file)
@@ -127,7 +126,7 @@ def writeDataFile(conn, username, msg_list):
     with open("userdata/data.json", "w") as file:
         json.dump(data, file, indent=2)
 
-
+# Send data from data.json to user
 def sendData(conn):
     with open("userdata/data.json", "r") as file:
         data = json.load(file)
@@ -136,47 +135,60 @@ def sendData(conn):
 
 
 def handle_client(conn, addr):
+    # Server waiting loop
     while True:
+        # Receive user's option
         list = receive(conn)
         list = eval(list)
-        if list[0] == "Sign up":
+        if list[0] == "Sign up":  # Sign up
             signupExe(conn, list[1], list[2])
-        elif list[0] == "Log in":
+        elif list[0] == "Log in":  # Log in
             out = loginExe(list[1], list[2])
             send(conn, out)
-            if out == "0":
+            if out == "0":  # Login successful
                 print(f"[NEW CONNECTION] {list[1]} connected.")
+                # Add username to data.json if username didn't exist
                 addUser(list[1])
-                sendData(conn)
+                sendData(conn)  # Send data to show for client
+
+                # Receive user's option
                 while True:
                     msg_list = receive(conn)
                     msg_list = eval(msg_list)
-                    if msg_list[0] == DISCONNECT_MESSAGE:
+                    if msg_list[0] == DISCONNECT_MESSAGE:  # If client disconnects
                         print(f"[DISCONNECTION] {list[1]} disconnected.")
-                        conn.close()
+                        conn.close()  # Close connection
                         return
-                    elif msg_list[0] == "Add":
+                    elif msg_list[0] == "Add":  # Add
+                        # Add data to data.json
                         writeDataFile(conn, list[1], msg_list)
                         sendData(conn)
-                    elif msg_list[0] == "Show":
+                    elif msg_list[0] == "Show":  # Show
+                        # Open & Encode file data
                         img = open(msg_list[1], "rb")
                         data = base64.b64encode(img.read())
-                        conn.send(data)
-                    elif msg_list[0] == "Download":
+                        conn.send(data)  # Send encoded data to user
+                    elif msg_list[0] == "Download":  # Download
+                        # Open and convert file to sendable data
                         file = open(msg_list[1], "rb")
                         file_data = file.read()
-                        conn.send(file_data)
+                        conn.send(file_data)  # Send converted data to user
                         file.close()
         else:
-            conn.close()
+            conn.close()  # Close connection
             break
 
 
 def start():
+    # Clear screen
     os.system('cls')
+
+    # Waiting for client to connect
     server.listen()
     print("[STARTING] Server is starting...")
     print(f"[LISTENING] Server is listening on {SERVER}")
+
+    # Handle clients thread
     while True:
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr))

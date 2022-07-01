@@ -8,9 +8,8 @@ import tkinter.scrolledtext
 import tkinter.messagebox
 from tkinter import *
 from tkinter.filedialog import askopenfilename, askdirectory
-import PIL.Image
+from turtle import width
 from PIL import ImageTk, Image
-from pathlib import Path
 from tkinter import ttk
 
 PORT = 5050
@@ -23,76 +22,58 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 class Client:
 
     def __init__(self):
+        # Clear screen
         os.system('cls')
+
+        # IPv4 & TCP
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Connect to server
         self.sock.connect(ADDR)
-        # path = askdirectory(title='Select Folder')
-        self.login_thread = threading.Thread(target=self.login_signup_picker)
+
+        self.eye_show = True
+
+        # Start thread
+        self.login_thread = threading.Thread(target=self.signup_form)
         self.login_thread.start()
 
     # LOGIN SIGNUP
-    def login_signup_picker(self):
-        global tk
-        tk = Tk()
-        tk.iconbitmap('imgs/notes.ico')
-        tk.title("E-NOTE")
-        tk.config(bg='white')
-        tk.resizable(False, False)
-        tk.after(1, lambda: tk.focus_force())
-
-        window_height = 500
-        window_width = 900
-        screen_width = tk.winfo_screenwidth()
-        screen_height = tk.winfo_screenheight()
-        x_cordinate = int((screen_width/2) - (window_width/2))
-        y_cordinate = int((screen_height/2) - (window_height/2))
-        tk.geometry("{}x{}+{}+{}".format(window_width,
-                    window_height, x_cordinate, y_cordinate))
-
-        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
-        self.label = Label(tk, image=self.img, borderwidth=0,
-                           highlightthickness=0).place(x=0, y=0)
-
-        Label(tk, text="E-Note", bg="white", fg="#39c3e2",
-              font=("Times New Roman", 60, "bold")).place(x=585, y=120)
-
-        self.login_btn = ImageTk.PhotoImage(file="imgs/LogBtn.png")
-        self.login_button = Button(tk, image=self.login_btn,
-                                   borderwidth=0, highlightthickness=0,
-                                   command=lambda: (tk.destroy(),
-                                                    self.login_form()))
-        self.login_button.place(x=530, y=270)
-
-        self.signup_btn = ImageTk.PhotoImage(file="imgs/SignBtn.png")
-        self.signup_button = Button(tk, image=self.signup_btn,
-                                    borderwidth=0, highlightthickness=0,
-                                    command=lambda: (tk.destroy(),
-                                                     self.signup_form()))
-        self.signup_button.place(x=720, y=270)
-
-        tk.protocol("WM_DELETE_WINDOW", self.stop)
-        tk.mainloop()
+    def eyeExe(self):
+        # Hide/Show password button
+        if self.eye_show == True:
+            self.eye_show = False
+            self.password.config(show="", font=("helvetica", 13))
+        else:
+            self.eye_show = True
+            self.password.config(show="•", font=("helvetica", 16))
 
     def loginExe(self):
+        # Get text from entry boxes
         username = self.username.get()
         password = self.password.get()
+
+        # Send user's options & data to server
         list = str(["Log in", username, password])
         self.send(list)
+
+        # Receive server's checking validation
         out = self.receive()
         if out == "0":
             tkinter.messagebox.showinfo(
                 "Notification", "Log in successfully")
             tk.destroy()
             self.nickname = username
+
+            # Receive data from server to show on next window
             self.notes = self.receive()
             self.notes = eval(self.notes)
             self.mainGui()
-            print(1)
         else:
             tkinter.messagebox.showerror(
                 "Error", "Invalid username or password")
 
     def login_form(self):
+        # Create window
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
@@ -101,6 +82,7 @@ class Client:
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
 
+        # Set up window size & center window
         window_height = 500
         window_width = 900
         screen_width = tk.winfo_screenwidth()
@@ -110,56 +92,81 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
+        # Show background images
         self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
         Label(tk, image=self.img, borderwidth=0,
               highlightthickness=0).place(x=0, y=0)
-
         self.avatar = ImageTk.PhotoImage(file="imgs/avatar.png")
         Label(tk, image=self.avatar, borderwidth=0,
               highlightthickness=0).place(x=625, y=50)
 
+        # Add labels
         Label(tk, text="LOG IN", bg="white", fg="#39c3e2",
               font=("helvetica", 20, "bold")).place(x=645, y=200)
-
         Label(tk, text="USERNAME: ", bg="white", fg="#39c3e2",
               font=("helvetica", 13, "bold")).place(x=530, y=250)
         Label(tk, text="PASSWORD: ", bg="white", fg="#39c3e2",
               font=("helvetica", 13, "bold")).place(x=530, y=290)
 
+        # Add entry boxes
         self.username = Entry(tk, highlightthickness=0, relief=FLAT,
-                              fg="#202124", font=("helvetica", 13, "bold"))
+                              fg="#202124", font=("helvetica", 13))
         self.username.place(x=640, y=250)
-        self.username_line = Canvas(
-            tk, width=190, height=2.0, bg="#313131", highlightthickness=0)
-        self.username_line.place(x=640, y=270)
-
-        self.password = Entry(tk, show='*', highlightthickness=0,
-                              relief=FLAT, fg="#202124", font=("helvetica", 13, "bold"))
+        self.password = Entry(tk, show='•', highlightthickness=0,
+                              relief=FLAT, fg="#202124", font=("helvetica", 16))
         self.password.place(x=640, y=290)
-        self.password_line = Canvas(
-            tk, width=190, height=2.0, bg="#313131", highlightthickness=0)
-        self.password_line.place(x=640, y=310)
 
-        self.login_btn = ImageTk.PhotoImage(file="imgs/LogBtn.png")
-        self.button = Button(tk, image=self.login_btn,
-                             borderwidth=0, highlightthickness=0,
-                             command=lambda: (self.loginExe()))
-        self.button.place(x=625, y=345)
+        # Add 2 lines below entry boxes for decoration
+        username_line = Canvas(tk, width=190, height=1.0,
+                               bg="#313131", highlightthickness=0)
+        username_line.place(x=640, y=275)
+        password_line = Canvas(tk, width=190, height=1.0,
+                               bg="#313131", highlightthickness=0)
+        password_line.place(x=640, y=315)
 
+        # Show/Hide password button
+        eye = ImageTk.PhotoImage(file="imgs/eyeshow.png")
+        self.eye_button = Button(tk, image=eye, borderwidth=0,
+                                 highlightthickness=0)
+        self.eye_button.place(x=830, y=290)
+        self.eye_button.bind('<ButtonPress>', lambda event: self.eyeExe())
+
+        # Log in button
+        login_btn = ImageTk.PhotoImage(file="imgs/LogBtn.png")
+        button = Button(tk, image=login_btn,
+                        borderwidth=0, highlightthickness=0,
+                        command=lambda: (self.loginExe()))
+        button.place(x=625, y=345)
+
+        # Log in to Sign up button
+        sign_button = Button(tk, text='Want to join us? Sign up now', font=("helvetica", 11),
+                             borderwidth=0, highlightthickness=0, bg="#fff",
+                             command=lambda: (tk.destroy(), self.signup_form()))
+        sign_button.place(x=598, y=400)
+        sign_button_line = Canvas(tk, width=188, height=1.1,
+                                  bg="#313131", highlightthickness=0)
+        sign_button_line.place(x=603, y=420)
+
+        # Exit
         tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
     def signupExe(self):
+        # Get text from entry boxes
         username = self.username.get()
         password = self.password.get()
+
+        # Send user's options & data to server
         list = str(["Sign up", username, password])
         self.send(list)
+
+        # Receive server's checking validation
         out = self.receive()
         if out == "0":
             tkinter.messagebox.showinfo(
                 "Notification", "Sign up successfully")
             tk.destroy()
-            self.login_signup_picker()
+            self.login_form()
         elif out == "1":
             tkinter.messagebox.showerror(
                 "ERROR", "Username is too short")
@@ -177,14 +184,16 @@ class Client:
                 "ERROR", "ERROR!")
 
     def signup_form(self):
+        # Create window
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
-        tk.title("SIGNUP")
+        tk.title("SIGN UP")
         tk.config(bg='white')
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
 
+        # Set up window size & center window
         window_height = 500
         window_width = 900
         screen_width = tk.winfo_screenwidth()
@@ -194,74 +203,92 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
-        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
-        Label(tk, image=self.img, borderwidth=0,
+        # Show background images
+        img = ImageTk.PhotoImage(file="imgs/Home.jpg")
+        Label(tk, image=img, borderwidth=0,
               highlightthickness=0).place(x=0, y=0)
 
-        self.avatar = ImageTk.PhotoImage(file="imgs/avatar.png")
-        Label(tk, image=self.avatar, borderwidth=0,
+        avatar = ImageTk.PhotoImage(file="imgs/avatar.png")
+        Label(tk, image=avatar, borderwidth=0,
               highlightthickness=0).place(x=625, y=50)
 
+        # Add labels
         Label(tk, text="SIGN UP", bg="white", fg="#39c3e2",
               font=("helvetica", 20, "bold")).place(x=635, y=200)
-
         Label(tk, text="USERNAME: ", bg="white", fg="#39c3e2",
               font=("helvetica", 13, "bold")).place(x=530, y=250)
         Label(tk, text="PASSWORD: ", bg="white", fg="#39c3e2",
               font=("helvetica", 13, "bold")).place(x=530, y=290)
 
+        # Add entry boxes
         self.username = Entry(tk, highlightthickness=0, relief=FLAT,
-                              fg="#202124", font=("helvetica", 13, "bold"))
+                              fg="#202124", font=("helvetica", 13))
         self.username.place(x=640, y=250)
-        self.username_line = Canvas(
-            tk, width=190, height=2.0, bg="#313131", highlightthickness=0)
-        self.username_line.place(x=640, y=270)
-
-        self.password = Entry(tk, show='*', highlightthickness=0,
-                              relief=FLAT, fg="#202124", font=("helvetica", 13, "bold"))
+        self.password = Entry(tk, highlightthickness=0, relief=FLAT,
+                              fg="#202124", font=("helvetica", 13))
         self.password.place(x=640, y=290)
-        self.password_line = Canvas(
-            tk, width=190, height=2.0, bg="#313131", highlightthickness=0)
-        self.password_line.place(x=640, y=310)
 
+        # Add 2 lines below entry boxes for decoration
+        username_line = Canvas(tk, width=190, height=1.0,
+                               bg="#313131", highlightthickness=0)
+        username_line.place(x=640, y=275)
+        password_line = Canvas(tk, width=190, height=1.0,
+                               bg="#313131", highlightthickness=0)
+        password_line.place(x=640, y=315)
+
+        # Sign up button
         self.login_btn = ImageTk.PhotoImage(file="imgs/SignBtn.png")
         self.button = Button(tk, image=self.login_btn,
                              borderwidth=0, highlightthickness=0,
                              command=lambda: (self.signupExe()))
         self.button.place(x=625, y=345)
 
+        # Sign up to Log in button
+        log_button = Button(tk, text='Already have an account?', font=("helvetica", 11),
+                            borderwidth=0, highlightthickness=0, bg="#fff",
+                            command=lambda: (tk.destroy(), self.login_form()))
+        log_button.place(x=615, y=400)
+        log_button_line = Canvas(
+            tk, width=167, height=1.1, bg="#313131", highlightthickness=0)
+        log_button_line.place(x=619, y=420)
+
+        # Exit
         tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
     # ADD
     def addNoteExe(self):
+        # Get data from user entry boxes
         title = self.input_title.get('1.0', 'end')
         message = self.input_area.get('1.0', 'end')
+
+        # Send data to user and return to main GUI
         if title != "\n" and message != "\n":
-            self.input_title.delete('1.0', END)
-            self.input_area.delete('1.0', END)
-            tk.destroy()
+            tk.destroy()  # Exit add GUI
             title = title[:-1]
             message = message[:-1]
+            # Send data to server
             self.send(str(["Add", "Txt", title, message]))
             tkinter.messagebox.showinfo(
                 "Notification", "Add text successfully")
-            self.notes = self.receive()
+            self.notes = self.receive()  # Receive updated data
             self.notes = eval(self.notes)
-            self.mainGui()
+            self.mainGui()  # Return to main GUI
         else:
             tkinter.messagebox.showerror(
                 "ERROR", "Cannot leave title or message empty!")
 
     def addNoteGui(self):
+        # Create window
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
         tk.title("ADD NOTE")
-        tk.config(bg='lightgray')
+        tk.config(bg='#c5ebec')
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
 
+        # Set up window size & center window
         window_height = 300
         window_width = 400
         screen_width = tk.winfo_screenwidth()
@@ -271,19 +298,20 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
+        # Entry boxes for adding note
         self.input_title = Text(tk, height=1)
         self.input_title.pack(padx=20, pady=3)
-
         self.input_area = Text(tk, height=4)
         self.input_area.pack(padx=20, pady=5)
 
-        self.send_note_button = Button(
-            tk, text='Add', command=lambda: self.addNoteExe())
-        self.send_note_button.config(font=("Arial", 12))
-        self.send_note_button.pack(side=RIGHT, padx=20, pady=5)
+        # Add note button
+        send_note_button = Button(tk, text='Add',
+                                  command=lambda: self.addNoteExe())
+        send_note_button.config(font=("Helvetica", 13))
+        send_note_button.pack(side=RIGHT, padx=20, pady=5)
 
+        # Exit
         tk.protocol("WM_DELETE_WINDOW", self.stop)
-
         tk.mainloop()
 
     def addImgExe(self):
@@ -375,7 +403,40 @@ class Client:
         tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
+    def showImgExe(self):
+        tk.destroy()
+        self.mainGui()
+
+    def showImgGui(self, width, height):
+        global tk
+        tk = Tk()
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("ADD NOTE")
+        tk.config(bg='lightgray')
+        tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
+
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        new_width = int(width * (screen_height/height))
+        new_height = screen_height
+
+        if height > screen_height:
+            newsize = (new_width, new_height)
+            self.buffer_image = self.buffer_image.resize(newsize)
+
+        tk.geometry("{}x{}+{}+{}".format(screen_width,
+                    screen_height, 0, 0))
+
+        img = ImageTk.PhotoImage(self.buffer_image)
+        Label(tk, image=img, borderwidth=0,
+              highlightthickness=0).place(x=(screen_width-new_width)/2, y=(screen_height-new_height)/2)
+
+        tk.protocol("WM_DELETE_WINDOW", self.showImgExe)
+        tk.mainloop()
+
     # SHOW
+
     def showNoteExe(self, title, msg):
         global tk
         tk = Tk()
@@ -385,8 +446,8 @@ class Client:
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
 
-        window_height = 300
-        window_width = 400
+        window_height = 400
+        window_width = 500
         screen_width = tk.winfo_screenwidth()
         screen_height = tk.winfo_screenheight()
         x_cordinate = int((screen_width/2) - (window_width/2))
@@ -394,10 +455,12 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
-        self.input_title = Label(tk, text=title, height=1)
-        self.input_title.pack(padx=20, pady=3)
+        self.input_title = Label(tk, text=title, height=1,
+                                 width=40, anchor="nw")
+        self.input_title.pack(padx=20, pady=5)
 
-        self.input_area = Label(tk, text=msg, height=4)
+        self.input_area = Label(tk, text=msg, height=20,
+                                width=40, anchor="nw")
         self.input_area.pack(padx=20, pady=5)
 
         self.send_note_button = Button(
@@ -416,14 +479,16 @@ class Client:
             tk.destroy()
             self.showNoteExe(path[2], path[3])
         elif path[1] == "Image":
+            tk.destroy()
             self.send(str(["Show", path[3]]))
             file = self.sock.recv(4096000)
-            image = Image.open(io.BytesIO(base64.b64decode(file)))
-            image.show()
-        else: 
+            buffer = io.BytesIO(base64.b64decode(file))
+            self.buffer_image = Image.open(buffer)
+            width, height = self.buffer_image.size
+            self.showImgGui(width, height)
+        else:
             tkinter.messagebox.showerror(
-                        "ERROR", "Cannot show this type of note")
-            
+                "ERROR", "Cannot show this type of note")
 
     # DOWNLOAD
     def downloadExe(self):
@@ -436,11 +501,11 @@ class Client:
                     file.write(f"Title: {path[2]}\nContent: {path[3]}")
                 file.close()
                 tkinter.messagebox.showinfo(
-                            "Notification", "Download note successfully")
+                    "Notification", "Download note successfully")
             except:
                 tkinter.messagebox.showerror(
-                        "ERROR", "Error while downloading note")
-                
+                    "ERROR", "Error while downloading note")
+
         else:
             self.send(str(["Download", path[3]]))
             dir = askdirectory(title='Select Folder')
@@ -464,8 +529,8 @@ class Client:
                         "ERROR", "Error while downloading file")
 
     # MAIN GUI
-
     def mainGui(self):
+        # Create window
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
@@ -474,6 +539,7 @@ class Client:
         tk.after(1, lambda: tk.focus_force())
         tk.resizable(False, False)
 
+        # Set up window size & center window
         window_height = 500
         window_width = 600
         screen_width = tk.winfo_screenwidth()
@@ -483,7 +549,7 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
-        # List Notes
+        # Create frame
         self.noteContainer = Frame(bg='#f2f2f2')
         self.noteContainer.place(x=40, y=30)
 
@@ -491,69 +557,82 @@ class Client:
         scrollBar = Scrollbar(self.noteContainer)
         scrollBar.pack(side=RIGHT, fill=Y)
 
+        # Create Treeview
         self.listNotes = ttk.Treeview(
             self.noteContainer, height=20, yscrollcommand=scrollBar.set)
         self.listNotes.pack()
 
-        # Treeview Style
+        # Treeview Style config
         style = ttk.Style()
         style.configure("Treeview.Heading", font=("helvetica", 13, "bold"))
         style.configure("Treeview", font=(
             "helvetica", 13), foreground='#202124')
 
-        # Configure The Scrollbar
+        # Scrollbar config
         scrollBar.config(command=self.listNotes.yview)
 
-        # List Notes Columns
+        # Tree view columns
         self.listNotes['columns'] = ("ID", "Type", "Title")
         self.listNotes.column("#0", width=0, stretch="NO")
         self.listNotes.column("ID", anchor="center", width=50)
         self.listNotes.column("Type", anchor="center", width=80)
         self.listNotes.column("Title", anchor="center", width=200)
 
+        # Treeview headings
         self.listNotes.heading("#0", text="", anchor="center")
         self.listNotes.heading("ID", text="ID", anchor="center")
         self.listNotes.heading("Type", text="Type", anchor="center")
         self.listNotes.heading("Title", text="Title", anchor="center")
 
-        # Insert Data To Treeview
+        # Insert data to treeview
         count = 0
-
         for note in self.notes[self.nickname]:
             self.listNotes.insert(parent='', index='end', iid=count, text="",
                                   values=(count+1, note["type"], note["title"], note["content"]))
             count += 1
 
+        # Add button
         add = ImageTk.PhotoImage(file="imgs/Add.png")
         add_btn = Button(tk, image=add,
                          borderwidth=0, highlightthickness=0,
                          command=lambda: (tk.destroy(), self.addGui()))
         add_btn.place(x=420, y=200)
 
+        # Show button
         show = ImageTk.PhotoImage(file="imgs/Show.png")
         show_btn = Button(tk, image=show,
                           borderwidth=0, highlightthickness=0,
                           command=lambda: (self.showExe()))
         show_btn.place(x=420, y=250)
 
+        # Download button
         download = ImageTk.PhotoImage(file="imgs/Download.png")
         download_btn = Button(tk, image=download,
                               borderwidth=0, highlightthickness=0,
                               command=lambda: (self.downloadExe()))
         download_btn.place(x=420, y=300)
 
-        tk.protocol("WM_DELETE_WINDOW", self.stop)
+        self.listNotes.focus_set()
+        children = self.listNotes.get_children()
+        if children:
+            self.listNotes.focus(children[0])
+            self.listNotes.selection_set(children[0])
 
+        # Exit
+        tk.protocol("WM_DELETE_WINDOW", self.stop)
         tk.mainloop()
 
+    # Stop & Disconnect
     def stop(self):
         self.send(str([DISCONNECT_MESSAGE]))
         self.sock.close()
         exit(0)
 
+    # Send
     def send(self, msg):
         self.sock.send(msg.encode(FORMAT))
 
+    # Receive
     def receive(self):
         return self.sock.recv(2048).decode(FORMAT)
 
