@@ -1,7 +1,5 @@
 import io
 import socket
-import gc
-import time
 import os
 import threading
 import base64
@@ -9,8 +7,7 @@ import tkinter as tk
 import tkinter.scrolledtext
 import tkinter.messagebox
 from tkinter import *
-from tkinter.filedialog import askopenfilename
-import PIL
+from tkinter.filedialog import askopenfilename, askdirectory
 import PIL.Image
 from PIL import ImageTk, Image
 from pathlib import Path
@@ -313,7 +310,6 @@ class Client:
                 "ERROR", "Error while adding image")
 
     def addFileExe(self):
-
         file_path = askopenfilename(title='Select File')
         try:
             file = open(f'{file_path}', 'rb')
@@ -419,11 +415,53 @@ class Client:
         if path[1] == "Txt":
             tk.destroy()
             self.showNoteExe(path[2], path[3])
-        else:
+        elif path[1] == "Image":
             self.send(str(["Show", path[3]]))
             file = self.sock.recv(4096000)
             image = Image.open(io.BytesIO(base64.b64decode(file)))
             image.show()
+        else: 
+            tkinter.messagebox.showerror(
+                        "ERROR", "Cannot show this type of note")
+            
+
+    # DOWNLOAD
+    def downloadExe(self):
+        selected_item = self.listNotes.focus()
+        path = self.listNotes.item(selected_item, "values")
+        if path[1] == "Txt":
+            dir = askdirectory(title='Select Folder')
+            try:
+                with open(f'{dir}/{path[2]}.txt', 'w') as file:
+                    file.write(f"Title: {path[2]}\nContent: {path[3]}")
+                file.close()
+                tkinter.messagebox.showinfo(
+                            "Notification", "Download note successfully")
+            except:
+                tkinter.messagebox.showerror(
+                        "ERROR", "Error while downloading note")
+                
+        else:
+            self.send(str(["Download", path[3]]))
+            dir = askdirectory(title='Select Folder')
+            try:
+                file = open(f"{dir}/{path[2]}", "wb")
+                file_chunk = self.sock.recv(4096000)
+                file.write(file_chunk)
+                file.close()
+                if path[1] == "Image":
+                    tkinter.messagebox.showinfo(
+                        "Notification", "Download image successfully")
+                else:
+                    tkinter.messagebox.showinfo(
+                        "Notification", "Download file successfully")
+            except:
+                if path[1] == "Image":
+                    tkinter.messagebox.showerror(
+                        "ERROR", "Error while downloading image")
+                else:
+                    tkinter.messagebox.showerror(
+                        "ERROR", "Error while downloading file")
 
     # MAIN GUI
 
@@ -498,11 +536,11 @@ class Client:
                           command=lambda: (self.showExe()))
         show_btn.place(x=420, y=250)
 
-        delete = ImageTk.PhotoImage(file="imgs/Delete.png")
-        delete_btn = Button(tk, image=delete,
-                            borderwidth=0, highlightthickness=0,
-                            command=lambda: (tk.destroy(), self.deleteGui()))
-        delete_btn.place(x=420, y=300)
+        download = ImageTk.PhotoImage(file="imgs/Download.png")
+        download_btn = Button(tk, image=download,
+                              borderwidth=0, highlightthickness=0,
+                              command=lambda: (self.downloadExe()))
+        download_btn.place(x=420, y=300)
 
         tk.protocol("WM_DELETE_WINDOW", self.stop)
 

@@ -24,6 +24,21 @@
       "type": "Image",
       "title": "a.jpg",
       "content": "userdata/Anhkhoa/imgs/a.jpg"
+    },
+    {
+      "type": "Image",
+      "title": "Background.jpg",
+      "content": "userdata/Anhkhoa/imgs/Background.jpg"
+    },
+    {
+      "type": "File",
+      "title": "Meowsage.jpg",
+      "content": "userdata/Anhkhoa/files/Meowsage.jpg"
+    },
+    {
+      "type": "File",
+      "title": "z2802155677973_f34b33b2d71f2efbd3fa5aa719cc9a2a.jpg",
+      "content": "userdata/Anhkhoa/files/z2802155677973_f34b33b2d71f2efbd3fa5aa719cc9a2a.jpg"
     }
   ]
 }

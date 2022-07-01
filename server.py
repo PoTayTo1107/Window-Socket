@@ -162,7 +162,11 @@ def handle_client(conn, addr):
                         img = open(msg_list[1], "rb")
                         data = base64.b64encode(img.read())
                         conn.send(data)
-
+                    elif msg_list[0] == "Download":
+                        file = open(msg_list[1], "rb")
+                        file_data = file.read()
+                        conn.send(file_data)
+                        file.close()
         else:
             conn.close()
             break
