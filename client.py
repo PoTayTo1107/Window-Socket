@@ -271,12 +271,16 @@ class Client:
             self.send(str(["Add", "Txt", title, message]))
             tkinter.messagebox.showinfo(
                 "Notification", "Add text successfully")
-            self.notes = self.receive()  # Receive updated data
+            self.notes = self.receive()  # Receive updated data from server to show at mainGUI
             self.notes = eval(self.notes)
             self.mainGui()  # Return to main GUI
         else:
             tkinter.messagebox.showerror(
                 "ERROR", "Cannot leave title or message empty!")
+
+    def addNoteGuiExe(self):
+        tk.destroy()
+        self.mainGui()
 
     def addNoteGui(self):
         # Create window
@@ -311,53 +315,64 @@ class Client:
         send_note_button.pack(side=RIGHT, padx=20, pady=5)
 
         # Exit
-        tk.protocol("WM_DELETE_WINDOW", self.stop)
+        tk.protocol("WM_DELETE_WINDOW", self.addNoteGuiExe)
         tk.mainloop()
 
     def addImgExe(self):
+        # Get image directory from user
         img_path = askopenfilename(title='Select Image',
                                    filetypes=[("image", ".jpeg"),
                                               ("image", ".png"),
                                               ("image", ".jpg")])
         try:
-            img = open(img_path, 'rb')
+            img = open(img_path, 'rb')  # Open image for reading later
             while img_path.find('/') > 0:
+                # Get image name from img_path
                 img_path = img_path[img_path.find('/')+1:]
+            # Send user's option to server
             self.send(str(["Add", "Image", img_path]))
-            img_data = img.read()
+            img_data = img.read()  # Read and send image to server
             self.sock.send(img_data)
             img.close()
             tkinter.messagebox.showinfo(
                 "Notification", "Add image successfully")
-            tk.destroy()
-            self.notes = self.receive()
+            tk.destroy()  # Exit AddGui and return to mainGui
+            self.notes = self.receive()  # Receive updated data from server to show at mainGUI
             self.notes = eval(self.notes)
-            self.mainGui()
+            self.mainGui()  # Return to mainGUI
         except:
             tkinter.messagebox.showerror(
                 "ERROR", "Error while adding image")
 
     def addFileExe(self):
+        # Get file directory from user
         file_path = askopenfilename(title='Select File')
         try:
-            file = open(f'{file_path}', 'rb')
+            file = open(f'{file_path}', 'rb')  # Open file for reading later
             while file_path.find('/') > 0:
+                # Get file name from file_path
                 file_path = file_path[file_path.find('/')+1:]
+            # Send user's option to server
             self.send(str(["Add", "File", file_path]))
-            file_data = file.read()
+            file_data = file.read()  # Read and send file to server
             self.sock.send(file_data)
             file.close()
             tkinter.messagebox.showinfo(
                 "Notification", "Add file successfully")
-            tk.destroy()
-            self.notes = self.receive()
+            tk.destroy()  # Exit AddGui and return to mainGui
+            self.notes = self.receive()  # Receive updated data from server to show at mainGUI
             self.notes = eval(self.notes)
-            self.mainGui()
+            self.mainGui()  # Return to mainGUI
         except:
             tkinter.messagebox.showerror(
                 "ERROR", "Error while adding file")
 
+    def addExe(self):
+        tk.destroy()
+        self.mainGui()
+
     def addGui(self):
+        # Create window
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
@@ -366,8 +381,9 @@ class Client:
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
 
-        window_height = 500
-        window_width = 900
+        # Set up window size & center window
+        window_height = 400
+        window_width = 700
         screen_width = tk.winfo_screenwidth()
         screen_height = tk.winfo_screenheight()
         x_cordinate = int((screen_width/2) - (window_width/2))
@@ -375,32 +391,79 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
-        self.img = ImageTk.PhotoImage(file="imgs/Home.jpg")
-        Label(tk, image=self.img, borderwidth=0,
+        # Background image
+        img = ImageTk.PhotoImage(file="imgs/Addhome.jpg")
+        Label(tk, image=img, borderwidth=0,
               highlightthickness=0).place(x=0, y=0)
 
-        Label(tk, text="FUNCTIONS", bg="white", fg="#39c3e2",
-              font=("helvetica", 40, "bold")).place(x=550, y=100)
+        # Label
+        Label(tk, text="NOTE TYPES", bg="white", fg="#39c3e2",
+              font=("helvetica", 25, "bold")).place(x=450, y=90)
 
-        self.addnote_btn_img = ImageTk.PhotoImage(file="imgs/Addnote.png")
-        self.addnote_btn = Button(tk, image=self.addnote_btn_img,
-                                  borderwidth=0, highlightthickness=0,
-                                  command=lambda: (tk.destroy(), self.addNoteGui()))
-        self.addnote_btn.place(x=625, y=200)
+        # Note types button
+        add_note_btn_img = ImageTk.PhotoImage(file="imgs/Addnote.png")
+        add_note_btn = Button(tk, image=add_note_btn_img,
+                              borderwidth=0, highlightthickness=0,
+                              command=lambda: (tk.destroy(), self.addNoteGui()))
+        add_note_btn.place(x=480, y=160)
 
-        self.addimg_btn_img = ImageTk.PhotoImage(file="imgs/Addimg.png")
-        self.addimg_btn = Button(tk, image=self.addimg_btn_img,
-                                 borderwidth=0, highlightthickness=0,
-                                 command=lambda: (self.addImgExe()))
-        self.addimg_btn.place(x=625, y=260)
+        add_img_btn_img = ImageTk.PhotoImage(file="imgs/Addimg.png")
+        add_img_btn = Button(tk, image=add_img_btn_img,
+                             borderwidth=0, highlightthickness=0,
+                             command=lambda: (self.addImgExe()))
+        add_img_btn.place(x=480, y=210)
 
-        self.addfile_btn_img = ImageTk.PhotoImage(file="imgs/Addfile.png")
-        self.addfile_btn = Button(tk, image=self.addfile_btn_img,
-                                  borderwidth=0, highlightthickness=0,
-                                  command=lambda: (self.addFileExe()))
-        self.addfile_btn.place(x=625, y=320)
+        add_file_btn_img = ImageTk.PhotoImage(file="imgs/Addfile.png")
+        add_file_btn = Button(tk, image=add_file_btn_img,
+                              borderwidth=0, highlightthickness=0,
+                              command=lambda: (self.addFileExe()))
+        add_file_btn.place(x=480, y=260)
 
-        tk.protocol("WM_DELETE_WINDOW", self.stop)
+        # Exit
+        tk.protocol("WM_DELETE_WINDOW", self.addExe)
+        tk.mainloop()
+
+    # SHOW
+    def showNoteExe(self):
+        tk.destroy()
+        self.mainGui()
+
+    def showNoteGui(self, title, msg):
+        # Create window
+        global tk
+        tk = Tk()
+        tk.iconbitmap('imgs/notes.ico')
+        tk.title("SHOW NOTE")
+        tk.config(bg='#c5ebec')
+        tk.resizable(False, False)
+        tk.after(1, lambda: tk.focus_force())
+
+        # Set up window size & center window
+        window_height = 400
+        window_width = 500
+        screen_width = tk.winfo_screenwidth()
+        screen_height = tk.winfo_screenheight()
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+        tk.geometry("{}x{}+{}+{}".format(window_width,
+                    window_height, x_cordinate, y_cordinate))
+
+        # Add labels
+        Label(tk, text="TITLE:", bg="#c5ebec", fg="#39c3e2",
+              font=("helvetica", 13, "bold")).place(x=16, y=10)
+        Label(tk, text="CONTENT:", bg="#c5ebec", fg="#39c3e2",
+              font=("helvetica", 13, "bold")).place(x=16, y=65)
+
+        # Create 2 label boxes for showing note content
+        input_title = Label(tk, text=title, height=1,  width=50, bg="#fff",
+                            anchor="nw", font=("Times New Roman", 13))
+        input_title.place(x=20, y=35)
+        input_area = Label(tk, text=msg, height=15, width=50, bg="#fff",
+                           anchor="nw", font=("Times New Roman", 13))
+        input_area.place(x=20, y=90)
+
+        # Exit
+        tk.protocol("WM_DELETE_WINDOW", self.showNoteExe)
         tk.mainloop()
 
     def showImgExe(self):
@@ -408,96 +471,69 @@ class Client:
         self.mainGui()
 
     def showImgGui(self, width, height):
+        # Create window
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
         tk.title("ADD NOTE")
-        tk.config(bg='lightgray')
+        tk.config(bg='black')
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())
 
+        # Set up window size & center window
         screen_width = tk.winfo_screenwidth()
         screen_height = tk.winfo_screenheight()
         new_width = int(width * (screen_height/height))
         new_height = screen_height
 
+        # Resize image to fit screen
         if height > screen_height:
             newsize = (new_width, new_height)
             self.buffer_image = self.buffer_image.resize(newsize)
 
+        # Configure window size
         tk.geometry("{}x{}+{}+{}".format(screen_width,
                     screen_height, 0, 0))
 
+        # Show image
         img = ImageTk.PhotoImage(self.buffer_image)
         Label(tk, image=img, borderwidth=0,
               highlightthickness=0).place(x=(screen_width-new_width)/2, y=(screen_height-new_height)/2)
 
+        # Exit
         tk.protocol("WM_DELETE_WINDOW", self.showImgExe)
         tk.mainloop()
 
-    # SHOW
-
-    def showNoteExe(self, title, msg):
-        global tk
-        tk = Tk()
-        tk.iconbitmap('imgs/notes.ico')
-        tk.title("ADD NOTE")
-        tk.config(bg='lightgray')
-        tk.resizable(False, False)
-        tk.after(1, lambda: tk.focus_force())
-
-        window_height = 400
-        window_width = 500
-        screen_width = tk.winfo_screenwidth()
-        screen_height = tk.winfo_screenheight()
-        x_cordinate = int((screen_width/2) - (window_width/2))
-        y_cordinate = int((screen_height/2) - (window_height/2)) - 20
-        tk.geometry("{}x{}+{}+{}".format(window_width,
-                    window_height, x_cordinate, y_cordinate))
-
-        self.input_title = Label(tk, text=title, height=1,
-                                 width=40, anchor="nw")
-        self.input_title.pack(padx=20, pady=5)
-
-        self.input_area = Label(tk, text=msg, height=20,
-                                width=40, anchor="nw")
-        self.input_area.pack(padx=20, pady=5)
-
-        self.send_note_button = Button(
-            tk, text='Close', command=lambda: (tk.destroy(), self.mainGui()))
-        self.send_note_button.config(font=("Arial", 12))
-        self.send_note_button.pack(side=RIGHT, padx=20, pady=5)
-
-        tk.protocol("WM_DELETE_WINDOW", self.stop)
-
-        tk.mainloop()
-
     def showExe(self):
+        # Get current focused item
         selected_item = self.listNotes.focus()
         path = self.listNotes.item(selected_item, "values")
         if path[1] == "Txt":
             tk.destroy()
-            self.showNoteExe(path[2], path[3])
+            self.showNoteGui(path[2], path[3])  # Show note
         elif path[1] == "Image":
             tk.destroy()
-            self.send(str(["Show", path[3]]))
-            file = self.sock.recv(4096000)
+            self.send(str(["Show", path[3]]))  # Send user's option to server
+            file = self.sock.recv(4096000)  # Receive & decode data
             buffer = io.BytesIO(base64.b64decode(file))
             self.buffer_image = Image.open(buffer)
-            width, height = self.buffer_image.size
-            self.showImgGui(width, height)
+            width, height = self.buffer_image.size  # Get image size
+            self.showImgGui(width, height)  # Show image
         else:
             tkinter.messagebox.showerror(
-                "ERROR", "Cannot show this type of note")
+                "ERROR", "Cannot show this type of note")  # Case item's type is file
 
     # DOWNLOAD
     def downloadExe(self):
+        # Get current focused item
         selected_item = self.listNotes.focus()
         path = self.listNotes.item(selected_item, "values")
         if path[1] == "Txt":
+            # Choose directory to save file
             dir = askdirectory(title='Select Folder')
             try:
                 with open(f'{dir}/{path[2]}.txt', 'w') as file:
+                    # Create new file & Write
                     file.write(f"Title: {path[2]}\nContent: {path[3]}")
                 file.close()
                 tkinter.messagebox.showinfo(
@@ -507,9 +543,12 @@ class Client:
                     "ERROR", "Error while downloading note")
 
         else:
+            # Send user's option to server
             self.send(str(["Download", path[3]]))
+            # Choose directory to save file
             dir = askdirectory(title='Select Folder')
             try:
+                # Create new file & Write
                 file = open(f"{dir}/{path[2]}", "wb")
                 file_chunk = self.sock.recv(4096000)
                 file.write(file_chunk)
@@ -584,13 +623,6 @@ class Client:
         self.listNotes.heading("Type", text="Type", anchor="center")
         self.listNotes.heading("Title", text="Title", anchor="center")
 
-        # Insert data to treeview
-        count = 0
-        for note in self.notes[self.nickname]:
-            self.listNotes.insert(parent='', index='end', iid=count, text="",
-                                  values=(count+1, note["type"], note["title"], note["content"]))
-            count += 1
-
         # Add button
         add = ImageTk.PhotoImage(file="imgs/Add.png")
         add_btn = Button(tk, image=add,
@@ -612,6 +644,14 @@ class Client:
                               command=lambda: (self.downloadExe()))
         download_btn.place(x=420, y=300)
 
+        # Insert data to treeview
+        count = 0
+        for note in self.notes[self.nickname]:
+            self.listNotes.insert(parent='', index='end', iid=count, text="",
+                                  values=(count+1, note["type"], note["title"], note["content"]))
+            count += 1
+
+        # Set treeview focus to first note
         self.listNotes.focus_set()
         children = self.listNotes.get_children()
         if children:

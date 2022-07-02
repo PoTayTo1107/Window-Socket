@@ -1,46 +1,6 @@
 {
   "Anhkhoa": [
     {
-      "type": "Image",
-      "title": "21127321.jpg",
-      "content": "userdata/Anhkhoa/imgs/21127321.jpg"
-    },
-    {
-      "type": "Txt",
-      "title": "Khoa",
-      "content": "Iu Lam <3"
-    },
-    {
-      "type": "Txt",
-      "title": "Le Vu Ngan Lam",
-      "content": "Tran Do Anh Khoa"
-    },
-    {
-      "type": "Image",
-      "title": "a.jpg",
-      "content": "userdata/Anhkhoa/imgs/a.jpg"
-    },
-    {
-      "type": "Image",
-      "title": "a.jpg",
-      "content": "userdata/Anhkhoa/imgs/a.jpg"
-    },
-    {
-      "type": "Image",
-      "title": "Background.jpg",
-      "content": "userdata/Anhkhoa/imgs/Background.jpg"
-    },
-    {
-      "type": "File",
-      "title": "Meowsage.jpg",
-      "content": "userdata/Anhkhoa/files/Meowsage.jpg"
-    },
-    {
-      "type": "File",
-      "title": "z2802155677973_f34b33b2d71f2efbd3fa5aa719cc9a2a.jpg",
-      "content": "userdata/Anhkhoa/files/z2802155677973_f34b33b2d71f2efbd3fa5aa719cc9a2a.jpg"
-    },
-    {
       "type": "Txt",
       "title": "Khoa\t",
       "content": "Khoa"
@@ -52,13 +12,18 @@
     },
     {
       "type": "Txt",
-      "title": "AnhKhoa\t",
-      "content": "Anhkhoa"
+      "title": "Tran Khoa",
+      "content": "Tran Khoa\tKhoa"
     },
     {
-      "type": "Txt",
-      "title": "Khoa\t",
-      "content": "Khoa"
+      "type": "Image",
+      "title": "NganLam.jpg",
+      "content": "userdata/Anhkhoa/imgs/NganLam.jpg"
+    },
+    {
+      "type": "Image",
+      "title": "k12_1.jpg",
+      "content": "userdata/Anhkhoa/imgs/k12_1.jpg"
     }
   ]
 }
