@@ -142,10 +142,10 @@ class Client:
         sign_button = Button(tk, text='Want to join us? Sign up now', font=("helvetica", 11),
                              borderwidth=0, highlightthickness=0, bg="#fff",
                              command=lambda: (tk.destroy(), self.signup_form()))
-        sign_button.place(x=598, y=400)
+        sign_button.place(x=603, y=400)
         sign_button_line = Canvas(tk, width=188, height=1.1,
                                   bg="#313131", highlightthickness=0)
-        sign_button_line.place(x=603, y=420)
+        sign_button_line.place(x=608, y=420)
 
         # Exit
         tk.protocol("WM_DELETE_WINDOW", self.stop)
@@ -293,8 +293,8 @@ class Client:
         tk.after(1, lambda: tk.focus_force())
 
         # Set up window size & center window
-        window_height = 300
-        window_width = 400
+        window_height = 400
+        window_width = 500
         screen_width = tk.winfo_screenwidth()
         screen_height = tk.winfo_screenheight()
         x_cordinate = int((screen_width/2) - (window_width/2))
@@ -302,17 +302,25 @@ class Client:
         tk.geometry("{}x{}+{}+{}".format(window_width,
                     window_height, x_cordinate, y_cordinate))
 
+        # Add labels
+        Label(tk, text="TITLE:", bg="#c5ebec", fg="#39c3e2",
+              font=("helvetica", 13, "bold")).place(x=16, y=10)
+        Label(tk, text="CONTENT:", bg="#c5ebec", fg="#39c3e2",
+              font=("helvetica", 13, "bold")).place(x=16, y=65)
+
         # Entry boxes for adding note
-        self.input_title = Text(tk, height=1)
-        self.input_title.pack(padx=20, pady=3)
-        self.input_area = Text(tk, height=4)
-        self.input_area.pack(padx=20, pady=5)
+        self.input_title = Text(tk, height=1, width=50, bg="#fff",
+                                font=("Times New Roman", 13))
+        self.input_title.place(x=20, y=35)
+        self.input_area = Text(tk, height=13, width=50, bg="#fff",
+                               font=("Times New Roman", 13))
+        self.input_area.place(x=20, y=90)
 
         # Add note button
         send_note_button = Button(tk, text='Add',
                                   command=lambda: self.addNoteExe())
         send_note_button.config(font=("Helvetica", 13))
-        send_note_button.pack(side=RIGHT, padx=20, pady=5)
+        send_note_button.place(x=430, y=355)
 
         # Exit
         tk.protocol("WM_DELETE_WINDOW", self.addNoteGuiExe)
@@ -454,13 +462,18 @@ class Client:
         Label(tk, text="CONTENT:", bg="#c5ebec", fg="#39c3e2",
               font=("helvetica", 13, "bold")).place(x=16, y=65)
 
-        # Create 2 label boxes for showing note content
-        input_title = Label(tk, text=title, height=1,  width=50, bg="#fff",
-                            anchor="nw", font=("Times New Roman", 13))
-        input_title.place(x=20, y=35)
-        input_area = Label(tk, text=msg, height=15, width=50, bg="#fff",
-                           anchor="nw", font=("Times New Roman", 13))
-        input_area.place(x=20, y=90)
+        # Create 2 text boxes for showing note content
+        title_box = Text(tk, height=1, width=50, bg="#fff",
+                         font=("Times New Roman", 13))
+        title_box.place(x=20, y=35)
+        title_box.insert('end', title)
+        title_box.config(state='disabled')
+
+        text_box = Text(tk, height=15, width=50, bg="#fff",
+                        font=("Times New Roman", 13))
+        text_box.place(x=20, y=90)
+        text_box.insert('end', msg)
+        text_box.config(state='disabled')
 
         # Exit
         tk.protocol("WM_DELETE_WINDOW", self.showNoteExe)
