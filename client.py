@@ -547,7 +547,7 @@ class Client:
             try:
                 with open(f'{dir}/{path[2]}.txt', 'w') as file:
                     # Create new file & Write
-                    file.write(f"Title: {path[2]}\nContent: {path[3]}")
+                    file.write(path[3])
                 file.close()
                 tkinter.messagebox.showinfo(
                     "Notification", "Download note successfully")
