@@ -17,11 +17,6 @@
     },
     {
       "type": "Image",
-      "title": "NganLam.jpg",
-      "content": "userdata/Anhkhoa/imgs/NganLam.jpg"
-    },
-    {
-      "type": "Image",
       "title": "k12_1.jpg",
       "content": "userdata/Anhkhoa/imgs/k12_1.jpg"
     },
@@ -34,6 +29,25 @@
       "type": "Txt",
       "title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "content": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "type": "Image",
+      "title": "NganLam.jpg",
+      "content": "userdata/Anhkhoa/imgs/NganLam.jpg"
+    }
+  ],
+  "buisieucapvippro": [
+    {
+      "type": "Txt",
+      "title": "concacsieutokhunglo",
+      "content": "KHOA"
+    }
+  ],
+  "NganLam": [
+    {
+      "type": "Txt",
+      "title": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnbui minh",
+      "content": "NAhkahilhuFGLGFlhgfgkaskjFVhjVjhvhvHKCvkbkjbkjdsbfjkbsflzshvfsvzvzvzvzvznv"
     }
   ]
 }

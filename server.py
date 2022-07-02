@@ -122,7 +122,7 @@ def writeDataFile(conn, username, msg_list):
         file_chunk = conn.recv(4096000)
         file.write(file_chunk)
         file.close()
-    data[username].append(dataToAdd)
+    data[username].append(dataToAdd) # Update data and rewrite data.json
     with open("userdata/data.json", "w") as file:
         json.dump(data, file, indent=2)
 
