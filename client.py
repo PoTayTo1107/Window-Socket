@@ -328,52 +328,64 @@ class Client:
 
     def addImgExe(self):
         # Get image directory from user
-        img_path = askopenfilename(title='Select Image',
+        image_path = askopenfilename(title='Select Image',
                                    filetypes=[("image", ".jpeg"),
                                               ("image", ".png"),
                                               ("image", ".jpg")])
-        try:
-            img = open(img_path, 'rb')  # Open image for reading later
-            while img_path.find('/') > 0:
-                # Get image name from img_path
-                img_path = img_path[img_path.find('/')+1:]
+        if not image_path:
+            tkinter.messagebox.showerror(
+                "ERROR", "Error while adding image")
+        else:
+            image = open(image_path, 'rb')  # Open file for reading later
+            while image_path.find('/') > 0:
+                # Get file name from file_path
+                image_path = image_path[image_path.find('/')+1:]
             # Send user's option to server
-            self.send(str(["Add", "Image", img_path]))
-            img_data = img.read()  # Read and send image to server
-            self.sock.send(img_data)
-            img.close()
-            tkinter.messagebox.showinfo(
-                "Notification", "Add image successfully")
-            tk.destroy()  # Exit AddGui and return to mainGui
+            self.send(str(["Add", "Image", image_path]))
+            if self.receive() == "1":
+                tkinter.messagebox.showerror(
+                "ERROR", "Duplicate image")
+                tk.destroy()  # Exit AddGui and return to mainGui
+            else:
+                image_data = image.read()  # Read and send file to server
+                self.sock.send(image_data)
+                image.close()
+                tkinter.messagebox.showinfo(
+                    "Notification", "Add image successfully")
+                tk.destroy()  # Exit AddGui and return to mainGui
             self.notes = self.receive()  # Receive updated data from server to show at mainGUI
             self.notes = eval(self.notes)
             self.mainGui()  # Return to mainGUI
-        except:
-            tkinter.messagebox.showerror(
-                "ERROR", "Error while adding image")
 
     def addFileExe(self):
         # Get file directory from user
         file_path = askopenfilename(title='Select File')
-        try:
-            file = open(f'{file_path}', 'rb')  # Open file for reading later
+        if not file_path:
+            self.send(str(["Add", "File", file_path]))
+            tkinter.messagebox.showerror(
+                "ERROR", "Error while adding file")
+        else:
+            file_path_dup = file_path
             while file_path.find('/') > 0:
                 # Get file name from file_path
                 file_path = file_path[file_path.find('/')+1:]
             # Send user's option to server
             self.send(str(["Add", "File", file_path]))
-            file_data = file.read()  # Read and send file to server
-            self.sock.send(file_data)
-            file.close()
-            tkinter.messagebox.showinfo(
-                "Notification", "Add file successfully")
-            tk.destroy()  # Exit AddGui and return to mainGui
+            if self.receive() == "1":
+                tkinter.messagebox.showerror(
+                "ERROR", "Duplicate file")
+                tk.destroy()  # Exit AddGui and return to mainGui
+            else:
+                file = open(file_path_dup, 'rb')  # Open file for reading 
+                file_data = file.read()  # Read and send file to server
+                self.sock.send(file_data)
+                file.close()
+                tkinter.messagebox.showinfo(
+                    "Notification", "Add file successfully")
+                tk.destroy()  # Exit AddGui and return to mainGui
             self.notes = self.receive()  # Receive updated data from server to show at mainGUI
             self.notes = eval(self.notes)
             self.mainGui()  # Return to mainGUI
-        except:
-            tkinter.messagebox.showerror(
-                "ERROR", "Error while adding file")
 
     def addExe(self):
         tk.destroy()
@@ -488,7 +500,7 @@ class Client:
         global tk
         tk = Tk()
         tk.iconbitmap('imgs/notes.ico')
-        tk.title("ADD NOTE")
+        tk.title("SHOW IMAGE")
         tk.config(bg='black')
         tk.resizable(False, False)
         tk.after(1, lambda: tk.focus_force())

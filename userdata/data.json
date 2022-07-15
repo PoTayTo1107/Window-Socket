@@ -31,22 +31,27 @@
       "content": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     },
     {
+      "type": "Txt",
+      "title": "Test",
+      "content": "Test"
+    },
+    {
       "type": "Image",
-      "title": "NganLam.jpg",
-      "content": "userdata/Anhkhoa/imgs/NganLam.jpg"
+      "title": "lap_bg.jpg",
+      "content": "userdata/Anhkhoa/imgs/lap_bg.jpg"
     }
   ],
   "buisieucapvippro": [
     {
       "type": "Txt",
-      "title": "concacsieutokhunglo",
+      "title": "hi",
       "content": "KHOA"
     }
   ],
   "NganLam": [
     {
       "type": "Txt",
-      "title": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnbui minh",
+      "title": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnbuiminh",
       "content": "NAhkahilhuFGLGFlhgfgkaskjFVhjVjhvhvHKCvkbkjbkjdsbfjkbsflzshvfsvzvzvzvzvznv"
     }
   ]
