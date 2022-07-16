@@ -90,41 +90,55 @@ def writeDataFile(conn, username, msg_list):
             "title": msg_list[2],
             "content": msg_list[3]
         }
+        data[username].append(dataToAdd) # Update data and rewrite data.json
+        with open("userdata/data.json", "w") as ffile:
+                json.dump(data, ffile, indent=2)
     elif msg_list[1] == 'Image':
         image_path = f'userdata/{username}/imgs'
-        try:
-            os.makedirs(image_path)
-        except FileExistsError:
-            pass
-        content = f'{image_path}/{msg_list[2]}'
-        dataToAdd = {
-            "type": msg_list[1],
-            "title": msg_list[2],
-            "content": content
-        }
-        image = open(content, "wb")
-        image_chunk = conn.recv(4096000)
-        image.write(image_chunk)
-        image.close()
+        if os.path.exists(f'{image_path}/{msg_list[2]}'):
+            send(conn, "1")
+        else:
+            try:
+                os.makedirs(image_path)
+            except FileExistsError:
+                pass
+            send(conn, "0")
+            content = f'{image_path}/{msg_list[2]}'
+            dataToAdd = {
+                "type": msg_list[1],
+                "title": msg_list[2],
+                "content": content
+            }
+            image = open(content, "wb")
+            image_chunk = conn.recv(4096000)
+            image.write(image_chunk)
+            image.close()
+            data[username].append(dataToAdd) # Update data and rewrite data.json
+            with open("userdata/data.json", "w") as ffile:
+                json.dump(data, ffile, indent=2)
     elif msg_list[1] == 'File':
         file_path = f'userdata/{username}/files'
-        try:
-            os.makedirs(file_path)
-        except FileExistsError:
-            pass
-        content = f'{file_path}/{msg_list[2]}'
-        dataToAdd = {
-            "type": msg_list[1],
-            "title": msg_list[2],
-            "content": content
-        }
-        file = open(content, "wb")
-        file_chunk = conn.recv(4096000)
-        file.write(file_chunk)
-        file.close()
-    data[username].append(dataToAdd) # Update data and rewrite data.json
-    with open("userdata/data.json", "w") as file:
-        json.dump(data, file, indent=2)
+        if os.path.exists(f'{file_path}/{msg_list[2]}'):
+            send(conn, "1")
+        else:
+            try:
+                os.makedirs(file_path)
+            except FileExistsError:
+                pass
+            send(conn, "0")
+            content = f'{file_path}/{msg_list[2]}'
+            dataToAdd = {
+                "type": msg_list[1],
+                "title": msg_list[2],
+                "content": content
+            }
+            file = open(content, "wb")
+            file_chunk = conn.recv(4096000)
+            file.write(file_chunk)
+            file.close()
+            data[username].append(dataToAdd) # Update data and rewrite data.json
+            with open("userdata/data.json", "w") as ffile:
+                json.dump(data, ffile, indent=2)
 
 # Send data from data.json to user
 def sendData(conn):
@@ -161,8 +175,11 @@ def handle_client(conn, addr):
                         return
                     elif msg_list[0] == "Add":  # Add
                         # Add data to data.json
-                        writeDataFile(conn, list[1], msg_list)
-                        sendData(conn)
+                        if not msg_list[2]:
+                            pass
+                        else:
+                            writeDataFile(conn, list[1], msg_list)
+                            sendData(conn)
                     elif msg_list[0] == "Show":  # Show
                         # Open & Encode file data
                         img = open(msg_list[1], "rb")
